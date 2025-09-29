@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Fond du paquet -->
+  <rect x="4" y="8" width="24" height="16" rx="2" fill="#3B82F6" stroke="#1E40AF" stroke-width="1.5"/>
+  
+  <!-- Ruban d'emballage horizontal -->
+  <rect x="4" y="14" width="24" height="4" fill="#1E40AF"/>
+  
+  <!-- Ruban d'emballage vertical -->
+  <rect x="14" y="8" width="4" height="16" fill="#1E40AF"/>
+  
+  <!-- Icône de boîte dans le coin -->
+  <rect x="6" y="10" width="6" height="4" rx="1" fill="#FFFFFF" opacity="0.9"/>
+  <rect x="7" y="11" width="4" height="2" fill="#3B82F6"/>
+  
+  <!-- Icône de boîte dans l'autre coin -->
+  <rect x="20" y="10" width="6" height="4" rx="1" fill="#FFFFFF" opacity="0.9"/>
+  <rect x="21" y="11" width="4" height="2" fill="#3B82F6"/>
+  
+  <!-- Icône de boîte en bas -->
+  <rect x="6" y="18" width="6" height="4" rx="1" fill="#FFFFFF" opacity="0.9"/>
+  <rect x="7" y="19" width="4" height="2" fill="#3B82F6"/>
+  
+  <!-- Icône de boîte en bas droite -->
+  <rect x="20" y="18" width="6" height="4" rx="1" fill="#FFFFFF" opacity="0.9"/>
+  <rect x="21" y="19" width="4" height="2" fill="#3B82F6"/>
+</svg>
+
+

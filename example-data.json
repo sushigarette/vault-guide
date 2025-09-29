@@ -1,0 +1,68 @@
+[
+  {
+    "entrée par": "ib",
+    "CLIENT": "MHCOMM",
+    "N° DE SERIE": "0B3337H214733F",
+    "MARQUE": "MICROSOFT",
+    "MODELE": "SURFACE GO3",
+    "LOCATION CLT / VENTE CLT": null,
+    "ECHEANCE FINANCEMENT LIXXBAIL": null,
+    "GESTION CARTE SIM": null,
+    "N° CARTE SIM (Vincent)": null,
+    "N° CARTE SIM (Orange)": null,
+    "N° CARTE SIM (Vincent-Auto)": null,
+    "Etat SIM": null,
+    "DATE DEBUT GARANTIE": "10/12/24",
+    "DUREE GARANTIE EN ANNEE": "1",
+    "DATE RECEPT°": "15/01/25",
+    "CLAVIER\n(0=non / 1=oui)": 1.0,
+    "STYLET OFFICIEL\n(1=oui)": 1.0,
+    "STYLET COMPATIBLE\n(1=oui)": null,
+    "SACOCHE": 1.0,
+    "AUTRES": null,
+    "DATE EXPEDIT°": null,
+    "TRANSPORTEUR": null,
+    "N° ENVOI": null,
+    "Rebut": null,
+    "Problème en cours": null,
+    "Historique Affectations Clientes": null,
+    "Remarques": null
+  },
+  {
+    "entrée par": "ib",
+    "CLIENT": "RESAPY",
+    "N° DE SERIE": "0B3337H214734G",
+    "MARQUE": "SAMSUNG",
+    "MODELE": "GALAXY TAB A8",
+    "LOCATION CLT / VENTE CLT": "LOCATION",
+    "ECHEANCE FINANCEMENT LIXXBAIL": "15/12/25",
+    "GESTION CARTE SIM": "ORANGE",
+    "N° CARTE SIM (Vincent)": "123456789",
+    "N° CARTE SIM (Orange)": "987654321",
+    "N° CARTE SIM (Vincent-Auto)": null,
+    "Etat SIM": "ACTIVE",
+    "DATE DEBUT GARANTIE": "01/01/25",
+    "DUREE GARANTIE EN ANNEE": "2",
+    "DATE RECEPT°": "10/01/25",
+    "CLAVIER\n(0=non / 1=oui)": 0.0,
+    "STYLET OFFICIEL\n(1=oui)": 0.0,
+    "STYLET COMPATIBLE\n(1=oui)": 1.0,
+    "SACOCHE": 1.0,
+    "AUTRES": "Protection écran",
+    "DATE EXPEDIT°": "12/01/25",
+    "TRANSPORTEUR": "CHRONOPOST",
+    "N° ENVOI": "CHR123456789",
+    "Rebut": null,
+    "Problème en cours": null,
+    "Historique Affectations Clientes": "Affecté à Resapy le 10/01/25",
+    "Remarques": "Tablette en excellent état"
+  }
+]
+
+
+
+
+
+
+
+

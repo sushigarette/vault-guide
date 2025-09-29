@@ -26,6 +26,10 @@ export const StockMovements = ({
         return <ArrowUp className="h-4 w-4 text-success" />;
       case 'out':
         return <ArrowDown className="h-4 w-4 text-destructive" />;
+      case 'sale':
+        return <ArrowDown className="h-4 w-4 text-blue-500" />;
+      case 'return':
+        return <ArrowUp className="h-4 w-4 text-green-500" />;
       case 'adjustment':
         return <RotateCw className="h-4 w-4 text-warning" />;
     }
@@ -37,6 +41,10 @@ export const StockMovements = ({
         return <Badge className="bg-success text-success-foreground">Entrée</Badge>;
       case 'out':
         return <Badge variant="destructive">Sortie</Badge>;
+      case 'sale':
+        return <Badge className="bg-blue-500 text-white">Vente</Badge>;
+      case 'return':
+        return <Badge className="bg-green-500 text-white">Retour</Badge>;
       case 'adjustment':
         return <Badge className="bg-warning text-warning-foreground">Ajustement</Badge>;
     }
@@ -85,11 +93,16 @@ export const StockMovements = ({
                 <div className="flex items-center gap-2 mb-1">
                   {getMovementBadge(movement.type)}
                   <span className="font-semibold">
-                    {movement.type === 'out' ? '-' : '+'}{movement.quantity}
+                    {movement.type === 'out' || movement.type === 'sale' ? '-' : '+'}{movement.quantity}
                   </span>
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {formatDate(movement.date)}
+                  {movement.reference && (
+                    <div className="text-xs text-muted-foreground">
+                      Ref: {movement.reference}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

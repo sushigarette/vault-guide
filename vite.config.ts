@@ -15,4 +15,13 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    sourcemap: false, // Désactiver les source maps en production
+  },
+  esbuild: {
+    // Réduire les avertissements de console
+    logOverride: {
+      'this-is-undefined-in-esm': 'silent'
+    }
+  }
 }));
