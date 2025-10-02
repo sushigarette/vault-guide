@@ -52,3 +52,8 @@ Pour une installation complète, exécutez les scripts dans l'ordre ci-dessus da
 - Les modifications sont automatiquement gérées par l'application
 
 
+
+
+
+
+
