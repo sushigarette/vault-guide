@@ -27,12 +27,15 @@ import {
 } from 'lucide-react';
 import { Product, StockMovement, ProductModification } from '@/types/stock';
 import { useStockSupabase as useStock } from '@/hooks/useStockSupabase';
+import { useAuth } from '@/hooks/useAuth';
+import { AuthForm } from '@/components/AuthForm';
 import QRCode from 'qrcode';
 import JsBarcode from 'jsbarcode';
 
 export const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const { products, modifications, updateProduct, loadModifications, loadProducts, loading } = useStock();
   const [product, setProduct] = useState<Product | null>(null);
   const [productModifications, setProductModifications] = useState<ProductModification[]>([]);
@@ -88,6 +91,23 @@ export const ProductDetail = () => {
       generateBarcode();
     }
   }, [product]);
+
+  // Afficher un loader pendant l'authentification
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Afficher le formulaire d'authentification si l'utilisateur n'est pas connecté
+  if (!user) {
+    return <AuthForm onAuthSuccess={() => window.location.reload()} />;
+  }
 
   // Affichage de l'état de chargement
   if (isLoading) {

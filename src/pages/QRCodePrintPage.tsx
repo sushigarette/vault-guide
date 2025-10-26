@@ -18,11 +18,14 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Product } from '@/types/stock';
 import { useStockSupabase } from '@/hooks/useStockSupabase';
+import { useAuth } from '@/hooks/useAuth';
+import { AuthForm } from '@/components/AuthForm';
 import { useNavigate } from 'react-router-dom';
 import QRCode from 'qrcode';
 
 export const QRCodePrintPage = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const { products, loading } = useStockSupabase();
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
@@ -387,6 +390,23 @@ export const QRCodePrintPage = () => {
       return () => clearTimeout(timer);
     }
   }, [filteredProducts]);
+
+  // Afficher un loader pendant l'authentification
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Afficher le formulaire d'authentification si l'utilisateur n'est pas connecté
+  if (!user) {
+    return <AuthForm onAuthSuccess={() => window.location.reload()} />;
+  }
 
   if (loading) {
     return (
