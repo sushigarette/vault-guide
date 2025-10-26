@@ -45,6 +45,52 @@ export const ProductDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
+  // Fonctions de génération de codes
+  const generateQRCode = async () => {
+    if (product && product.id) {
+      const qrUrl = `${window.location.origin}/product/${product.id}`;
+      const canvas = document.getElementById(`qr-${product.id}`) as HTMLCanvasElement;
+      if (canvas) {
+        try {
+          await QRCode.toCanvas(canvas, qrUrl, {
+            width: 150,
+            margin: 2,
+            color: {
+              dark: '#000000',
+              light: '#FFFFFF'
+            }
+          });
+        } catch (error) {
+          console.error('Erreur génération QR code:', error);
+        }
+      }
+    }
+  };
+
+  const generateBarcode = () => {
+    if (product && product.serialNumber) {
+      const canvas = document.getElementById(`barcode-${product.id}`) as HTMLCanvasElement;
+      if (canvas) {
+        try {
+          // Calculer la largeur adaptative basée sur la longueur du numéro de série
+          const serialLength = product.serialNumber.length;
+          const adaptiveWidth = Math.max(1, Math.min(3, 300 / (serialLength * 8)));
+          
+          JsBarcode(canvas, product.serialNumber, {
+            format: "CODE128",
+            width: adaptiveWidth,
+            height: 60,
+            displayValue: true,
+            fontSize: 10,
+            margin: 5
+          });
+        } catch (error) {
+          console.error('Erreur génération code-barres:', error);
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     const loadProduct = async () => {
       if (id && loadProductById) {
@@ -84,6 +130,7 @@ export const ProductDetail = () => {
       generateQRCode();
       generateBarcode();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product]);
 
   // Afficher un loader pendant l'authentification
@@ -196,53 +243,6 @@ export const ProductDetail = () => {
 
   const stockInfo = getStockStatus(product.status);
   const StockIcon = stockInfo.icon;
-
-  // Générer le QR code
-  const generateQRCode = async () => {
-    if (product && product.id) {
-      const qrUrl = `${window.location.origin}/product/${product.id}`;
-      const canvas = document.getElementById(`qr-${product.id}`) as HTMLCanvasElement;
-      if (canvas) {
-        try {
-          await QRCode.toCanvas(canvas, qrUrl, {
-            width: 150,
-            margin: 2,
-            color: {
-              dark: '#000000',
-              light: '#FFFFFF'
-            }
-          });
-        } catch (error) {
-          console.error('Erreur génération QR code:', error);
-        }
-      }
-    }
-  };
-
-  // Générer le code-barres
-  const generateBarcode = () => {
-    if (product && product.serialNumber) {
-      const canvas = document.getElementById(`barcode-${product.id}`) as HTMLCanvasElement;
-      if (canvas) {
-        try {
-          // Calculer la largeur adaptative basée sur la longueur du numéro de série
-          const serialLength = product.serialNumber.length;
-          const adaptiveWidth = Math.max(1, Math.min(3, 300 / (serialLength * 8)));
-          
-          JsBarcode(canvas, product.serialNumber, {
-            format: "CODE128",
-            width: adaptiveWidth,
-            height: 60,
-            displayValue: true,
-            fontSize: 10,
-            margin: 5
-          });
-        } catch (error) {
-          console.error('Erreur génération code-barres:', error);
-        }
-      }
-    }
-  };
 
   const handleEdit = () => {
     setShowEditModal(true);
