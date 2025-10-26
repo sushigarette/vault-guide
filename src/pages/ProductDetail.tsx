@@ -36,7 +36,7 @@ export const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { products, modifications, updateProduct, loadModifications, loadProducts, loading } = useStock();
+  const { products, modifications, updateProduct, loadModifications, loadProducts, loadProductById, loading } = useStock();
   const [product, setProduct] = useState<Product | null>(null);
   const [productModifications, setProductModifications] = useState<ProductModification[]>([]);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -46,36 +46,30 @@ export const ProductDetail = () => {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      // Si les produits sont en cours de chargement, attendre
-      if (loading) {
+    const loadProduct = async () => {
+      if (id) {
         setIsLoading(true);
         setNotFound(false);
-        return;
-      }
-
-      // Si les produits sont chargés, chercher le produit
-      if (products.length > 0) {
-        const foundProduct = products.find(p => p.id === id);
-        if (foundProduct) {
-          setProduct(foundProduct);
+        
+        // Charger le produit directement par son ID
+        const loadedProduct = await loadProductById(id);
+        
+        if (loadedProduct) {
+          setProduct(loadedProduct);
           setNotFound(false);
-          setIsLoading(false);
           // Récupérer les modifications pour ce produit
           const productMods = modifications.filter(m => m.productId === id);
           setProductModifications(productMods);
         } else {
-          // Produit non trouvé
           setNotFound(true);
-          setIsLoading(false);
         }
-      } else {
-        // Pas de produits chargés et pas en cours de chargement
-        setNotFound(true);
+        
         setIsLoading(false);
       }
-    }
-  }, [id, products, modifications, loading]);
+    };
+
+    loadProduct();
+  }, [id]);
 
   // Charger les modifications quand le produit change
   useEffect(() => {

@@ -869,6 +869,49 @@ export const useStockSupabase = () => {
     loadProducts(0, 3000);
   };
 
+  // Charger un produit spécifique par ID
+  const loadProductById = async (productId: string): Promise<Product | null> => {
+    try {
+      console.log(`Chargement du produit: ${productId}`);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', productId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        const formattedProduct: Product = {
+          id: data.id,
+          serialNumber: data.serial_number,
+          brand: data.brand,
+          model: data.model,
+          equipmentType: data.equipment_type as Product['equipmentType'],
+          status: data.status as Product['status'],
+          assignment: data.assignment || undefined,
+          entryDate: data.entry_date,
+          supplier: data.supplier,
+          invoiceNumber: data.invoice_number,
+          purchasePriceHt: data.purchase_price_ht,
+          usageDurationMonths: data.usage_duration_months,
+          reevaluationDate: data.reevaluation_date,
+          quantity: data.quantity,
+          currentQuantity: data.current_quantity,
+          comments: data.comments,
+          qrCode: `${window.location.origin}/product/${data.id}`,
+          createdAt: new Date(data.created_at),
+          updatedAt: new Date(data.updated_at),
+        };
+        return formattedProduct;
+      }
+      return null;
+    } catch (err: any) {
+      console.error('Erreur lors du chargement du produit:', err);
+      return null;
+    }
+  };
+
   // Fonction pour mettre à jour la contrainte de la table products
   const updateProductsConstraint = async () => {
     try {
@@ -1194,5 +1237,6 @@ export const useStockSupabase = () => {
     loadNextPage,
     loadPreviousPage,
     loadAllProducts,
+    loadProductById,
   };
 };
