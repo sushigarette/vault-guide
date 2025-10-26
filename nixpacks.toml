@@ -1,0 +1,15 @@
+# Configuration Nixpacks pour Coolify
+# Utilise Node.js 20 (Node.js 18.x est EOL)
+
+[phases]
+setup = """
+  nixpkgs = [
+    "nodejs_20"
+  ]
+"""
+
+[start]
+cmd = "npm run preview"
+
+[variables]
+NODE_ENV = "production"
