@@ -1,59 +1,26 @@
-# Scripts SQL - Setup de la base de données
+# Scripts SQL
 
-Ce dossier contient tous les scripts SQL nécessaires pour configurer la base de données du projet Vault Guide.
+## 📁 **Fichier conservé**
 
-## 📋 Ordre d'exécution recommandé
+### **migrate-new-structure.sql**
+Script de migration vers la nouvelle structure de la base de données.
 
-### 1. Configuration de base
-```sql
--- Script principal du schéma
-supabase-schema.sql
+**Ce script :**
+1. Ajoute les nouveaux champs `usage_duration_months` et `reevaluation_date`
+2. Met à jour les types de matériel avec 19 catégories
+3. Nettoie toutes les données existantes
+4. Vérifie que la base de données est prête pour les nouvelles données
+
+**⚠️ Attention :** Ce script supprime TOUTES les données existantes !
+
+**✅ Utilisation :**
+```bash
+# Exécuter le script dans Supabase SQL Editor
+psql -h your-db-host -U postgres -d your-db -f sql/migrate-new-structure.sql
 ```
 
-### 2. Configuration de l'authentification
-```sql
--- Configuration des politiques RLS et authentification
-setup-auth.sql
-```
-
-### 3. Tables des catégories
-```sql
--- Tables pour les types d'équipement et fournisseurs
-create-categories-tables-safe.sql
-```
-
-### 4. Table des collaborateurs
-```sql
--- Table pour gérer les collaborateurs
-create-collaborators-table.sql
-```
-
-### 5. Table des modifications
-```sql
--- Table pour l'historique des modifications
-create-modifications-table.sql
-```
-
-## 🚀 Installation rapide
-
-Pour une installation complète, exécutez les scripts dans l'ordre ci-dessus dans l'éditeur SQL de Supabase.
-
-## 📝 Notes
-
-- Tous les scripts sont idempotents (peuvent être exécutés plusieurs fois sans erreur)
-- Les scripts utilisent `CREATE TABLE IF NOT EXISTS` et `ON CONFLICT DO NOTHING`
-- Les politiques RLS sont configurées pour la sécurité des données
-- Les contraintes sont mises à jour automatiquement lors de l'ajout de nouvelles catégories
-
-## 🔧 Maintenance
-
-- Pour ajouter de nouveaux types d'équipement : utilisez l'interface de l'application
-- Pour ajouter de nouveaux fournisseurs : utilisez l'interface de l'application
-- Les modifications sont automatiquement gérées par l'application
-
-
-
-
-
-
-
+**📋 Contenu :**
+- Migration des colonnes
+- Ajout des nouveaux types de matériel
+- Contraintes et vérifications
+- Nettoyage complet des données

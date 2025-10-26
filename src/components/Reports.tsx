@@ -3,14 +3,19 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Download, TrendingUp, TrendingDown, Package } from 'lucide-react';
 import { Product, StockMovement } from '@/types/stock';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 interface ReportsProps {
   products: Product[];
   movements: StockMovement[];
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+const COLORS = [
+  '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8',
+  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+  '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+  '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2'
+];
 
 export const Reports = ({ products, movements }: ReportsProps) => {
   const formatCurrency = (amount: number) => {
@@ -20,17 +25,29 @@ export const Reports = ({ products, movements }: ReportsProps) => {
     }).format(amount);
   };
 
+  // Fonction pour obtenir une couleur unique pour chaque type de matériel
+  const getColorForEquipmentType = (equipmentType: string) => {
+    const types = Array.from(new Set(products.map(p => p.equipmentType || 'Non défini')));
+    const index = types.indexOf(equipmentType);
+    return COLORS[index % COLORS.length];
+  };
+
   // Données pour les graphiques par type de matériel
   const equipmentTypeData = products.reduce((acc, product) => {
-    const existing = acc.find(item => item.equipmentType === product.equipmentType);
+    const equipmentType = product.equipmentType || 'Non défini';
+    const existing = acc.find(item => item.equipmentType === equipmentType);
+    const price = product.purchasePriceHt || 0;
+    const quantity = product.currentQuantity || 0;
+    const value = price * quantity;
+    
     if (existing) {
       existing.count += 1;
-      existing.value += product.amount || 0;
+      existing.value += value;
     } else {
       acc.push({
-        equipmentType: product.equipmentType,
+        equipmentType: equipmentType,
         count: 1,
-        value: product.amount || 0
+        value: value
       });
     }
     return acc;
@@ -39,12 +56,17 @@ export const Reports = ({ products, movements }: ReportsProps) => {
 
   // Statistiques générales
   const totalProducts = products.length;
-  const totalValue = products.reduce((sum, product) => sum + (product.amount || 0), 0);
+  const totalValue = products.reduce((sum, product) => {
+    const price = product.purchasePriceHt || 0;
+    const quantity = product.currentQuantity || 0;
+    return sum + (price * quantity);
+  }, 0);
   const averageValue = totalProducts > 0 ? totalValue / totalProducts : 0;
 
   // Répartition par type de matériel
   const byEquipmentType = products.reduce((acc, product) => {
-    acc[product.equipmentType] = (acc[product.equipmentType] || 0) + 1;
+    const equipmentType = product.equipmentType || 'Non défini';
+    acc[equipmentType] = (acc[equipmentType] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
@@ -72,7 +94,7 @@ export const Reports = ({ products, movements }: ReportsProps) => {
         product.assignment,
         product.currentQuantity,
         product.purchasePriceHt || 0,
-        product.currentValue || 0,
+        (product.purchasePriceHt || 0) * (product.currentQuantity || 0),
         product.supplier || '',
         product.entryDate || '',
         product.comments || ''
@@ -136,69 +158,113 @@ export const Reports = ({ products, movements }: ReportsProps) => {
 
       {/* Répartition par type de matériel */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Graphique en barres par Type de Matériel */}
         <Card>
           <CardHeader>
             <CardTitle>Répartition par Type de Matériel</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {Object.entries(byEquipmentType).map(([equipmentType, count], index) => {
-                const typeData = equipmentTypeData.find(item => item.equipmentType === equipmentType);
-                const value = typeData?.value || 0;
-                const color = COLORS[index % COLORS.length];
-                return (
-                  <div key={equipmentType} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Badge 
-                        className="text-white"
-                        style={{ backgroundColor: color }}
-                      >
-                        {equipmentType.charAt(0).toUpperCase() + equipmentType.slice(1).replace('_', ' ')}
-                      </Badge>
-                      <span className="text-sm">{count} produits</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-medium">{formatCurrency(value)}</div>
-                      <div className="text-xs text-muted-foreground">Montant total</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Graphique par Type de Matériel</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={equipmentTypeData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ equipmentType, count, value }) => 
-                    `${equipmentType.charAt(0).toUpperCase() + equipmentType.slice(1).replace('_', ' ')}: ${count}`
-                  }
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="count"
-                >
-                  {equipmentTypeData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
+            <ResponsiveContainer width="100%" height={500}>
+              <BarChart
+                data={equipmentTypeData
+                  .sort((a, b) => b.count - a.count)
+                  .map((item, index) => ({
+                    ...item,
+                    displayName: item.equipmentType.charAt(0).toUpperCase() + item.equipmentType.slice(1).replace('_', ' '),
+                    color: COLORS[index % COLORS.length]
+                  }))}
+                margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="displayName" 
+                  angle={-45}
+                  textAnchor="end"
+                  height={100}
+                  interval={0}
+                  fontSize={12}
+                />
+                <YAxis 
+                  label={{ value: 'Nombre de produits', angle: -90, position: 'insideLeft' }}
+                />
                 <Tooltip 
                   formatter={(value, name, props) => [
                     `${value} produits (${formatCurrency(props.payload.value)})`, 
-                    'Détails'
-                  ]} 
+                    'Quantité'
+                  ]}
+                  labelFormatter={(label) => `Type: ${label}`}
+                />
+                <Bar dataKey="count" fill="#8884d8">
+                  {equipmentTypeData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={getColorForEquipmentType(entry.equipmentType)} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Graphique en secteurs pour les valeurs monétaires */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Valeur par Type de Matériel</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={400}>
+              <PieChart>
+                <Pie
+                  data={equipmentTypeData
+                    .filter(item => item.value > 0)
+                    .sort((a, b) => b.value - a.value)
+                    .map(item => ({
+                      ...item,
+                      displayName: item.equipmentType.charAt(0).toUpperCase() + item.equipmentType.slice(1).replace('_', ' ')
+                    }))}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ displayName, value, percent }) => {
+                    // Afficher le label seulement si le secteur fait plus de 3% du total
+                    return percent > 3 ? `${displayName}: ${formatCurrency(value)}` : '';
+                  }}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {equipmentTypeData
+                    .filter(item => item.value > 0)
+                    .sort((a, b) => b.value - a.value)
+                    .map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={getColorForEquipmentType(entry.equipmentType)} />
+                    ))}
+                </Pie>
+                <Tooltip 
+                  formatter={(value, name, props) => [
+                    formatCurrency(value), 
+                    'Valeur totale'
+                  ]}
+                  labelFormatter={(label) => `Type: ${label}`}
                 />
               </PieChart>
             </ResponsiveContainer>
+            
+            {/* Légende personnalisée */}
+            <div className="flex flex-wrap justify-center gap-4 mt-4">
+              {equipmentTypeData
+                .filter(item => item.value > 0)
+                .sort((a, b) => b.value - a.value)
+                .map((item) => (
+                  <div key={item.equipmentType} className="flex items-center gap-2">
+                    <div 
+                      className="w-4 h-4 rounded-sm" 
+                      style={{ backgroundColor: getColorForEquipmentType(item.equipmentType) }}
+                    />
+                    <span className="text-sm font-medium">
+                      {item.equipmentType.charAt(0).toUpperCase() + item.equipmentType.slice(1).replace('_', ' ')}
+                    </span>
+                  </div>
+                ))}
+            </div>
           </CardContent>
         </Card>
       </div>

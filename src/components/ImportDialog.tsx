@@ -59,14 +59,18 @@ export const ImportDialog = ({ isOpen, onClose, onImport }: ImportDialogProps) =
   };
 
   const downloadTemplate = () => {
-    // Créer un template avec le nouveau modèle de données
+    // Créer un template avec le nouveau modèle de données (11 colonnes)
     const templateData = [
-      ['N° DE SERIE', 'MARQUE', 'MODELE', 'TYPE DE MATERIEL', 'STATUT', 'AFFECTATION', 'DUREE UTILISATION ANNEE', 'DATE RECEPTION', 'FOURNISSEUR', 'N° FACTURE', 'QUANTITE', 'PRIX ACHAT HT', 'MONTANT TOTAL', 'DATE SORTIE', 'QUANTITE SORTIE', 'PRIX UNITAIRE SORTIE HT', 'MONTANT SORTIE', 'QUANTITE ACTUELLE', 'VALEUR ACTUELLE', 'COMMENTAIRES'],
-      ['0B3337H214733F', 'MICROSOFT', 'SURFACE GO3', 'ordinateur', 'EN_STOCK', 'CARDENAS Lionel', '1', '15/01/25', 'MICROSOFT', 'FAC-2025-001', '1', '620.00', '620.00', '', '', '', '', '1', '620.00', 'Tablette Surface Go3 avec clavier et stylet'],
-      ['ABC123456789', 'DELL', 'LATITUDE 5520', 'ordinateur', 'EN_UTILISATION', 'AÏSSA ABDI Djanet', '2', '10/12/23', 'DELL', 'FAC-2023-045', '1', '850.00', '850.00', '', '', '', '', '1', '850.00', 'Ordinateur portable professionnel'],
-      ['XYZ987654321', 'HP', 'PROBOOK 450', 'ordinateur', 'SAV', '', '3', '05/03/22', 'HP', 'FAC-2022-012', '1', '750.00', '750.00', '', '', '', '', '1', '750.00', 'En réparation - problème écran'],
-      ['DEF456789123', 'CISCO', 'SG350-28', 'switch', 'EN_STOCK', '', '0', '20/11/24', 'CISCO', 'FAC-2024-078', '1', '450.00', '450.00', '', '', '', '', '1', '450.00', 'Switch 28 ports Gigabit'],
-      ['GHI789123456', 'NETGEAR', 'AC1200', 'borne_wifi', 'EN_UTILISATION', 'MARTIN Pierre', '1', '15/09/24', 'NETGEAR', 'FAC-2024-056', '1', '120.00', '120.00', '', '', '', '', '1', '120.00', 'Point d\'accès WiFi']
+      ['N° SERIE', 'MARQUE', 'MODELE ou DESCRIPTION', 'TYPE MATERIEL', 'AFFECTATION', 'DATE ENTREE', 'FOURNISSEUR', 'N° FACTURE', 'PRIX ACHAT HT', 'DUREE PROBABLE D\'UTILISATION en mois', 'DATE REEVALUATION'],
+      ['3514C008', 'CANON', 'Imprimante ISENSYS MF443dw', 'Imprimante', 'Jean Dupont', '17/01/22', 'INMACWSTORE', 'FAC-2022-001', '329.00', '60', '17/01/27'],
+      ['SMP222QD8', 'LENOVO', 'PC Portable THINKBOOK 15', 'PC Portable', 'Marie Martin', '12/10/21', 'INMACWSTORE', 'FAC-2021-089', '805.00', '36', '12/10/24'],
+      ['XU2294HSU-B1', 'IIYAMA', 'Ecran PROLITE', 'Ecran PC', 'Flex Office', '22/03/22', 'LDLC PRO', 'FAC-2022-045', '131.00', '60', '22/03/27'],
+      ['5MWCH9DW110194', 'SAMSUNG', 'Ecran 24"', 'Ecran PC', 'Sarah Johnson', '05/06/23', 'LDLC PRO', 'FAC-2023-156', '98.00', '60', '05/06/28'],
+      ['352904115200385', 'IPHONE', 'Iphone 11 128 Go', 'Tel Mobile', 'Communication', '23/03/23', 'BACKMARKET', 'FAC-2023-034', '332.00', '48', '23/03/27'],
+      ['UP701QL9', 'LENOVO', 'Station accueil Thinkpad USB 3.0 Pro', 'Station d\'accueil', 'Nicolas MONNIER', '04/07/23', 'ARTO / VIA BACK MARKET', 'FAC-2023-078', '42.00', '60', '04/07/28'],
+      ['ED40A00FHD', 'EDENWOOD', 'Ecran TV et support', 'Ecran TV', 'MHComm Interne', '16/05/23', 'ELECTRO DEPOT', 'FAC-2023-067', '217.00', '60', '16/05/28'],
+      ['', '', '', '', '', '', '', '', '', '', ''],
+      ['FAKE_SERIAL_abc123', 'FAKE_BRAND_xyz789', 'FAKE_MODEL_def456', 'PC Portable', 'FAKE_ASSIGNMENT_ghi789', '15/01/24', 'FAKE_SUPPLIER_jkl012', 'FAKE_INVOICE_mno345', '456', '72', '15/01/24']
     ];
 
     const csvContent = templateData.map(row => row.join(',')).join('\n');
@@ -74,7 +78,7 @@ export const ImportDialog = ({ isOpen, onClose, onImport }: ImportDialogProps) =
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'template_import_stock.csv');
+    link.setAttribute('download', 'template_import_stock_nouveau.csv');
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -95,7 +99,9 @@ export const ImportDialog = ({ isOpen, onClose, onImport }: ImportDialogProps) =
                 <FileSpreadsheet className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <h3 className="text-lg font-medium mb-2">Importer des produits depuis Excel</h3>
                 <p className="text-muted-foreground mb-4">
-                  Téléchargez le template et remplissez-le avec vos données, puis importez le fichier.
+                  Téléchargez le template avec les 11 nouvelles colonnes et remplissez-le avec vos données. 
+                  <br />
+                  <strong>Toutes les colonnes sont obligatoires</strong> - les données manquantes seront remplacées par des valeurs "FAKE".
                 </p>
                 <Button
                   variant="outline"

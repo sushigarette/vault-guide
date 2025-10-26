@@ -83,7 +83,11 @@ export const ClientMachinePark = ({
 
   // Calculer les statistiques par client
   const clientSummaries: ClientSummary[] = Object.entries(clientGroups).map(([client, clientProducts]) => {
-    const totalValue = clientProducts.reduce((sum, p) => sum + (p.quantity * p.price), 0);
+    const totalValue = clientProducts.reduce((sum, p) => {
+      const price = p.purchasePriceHt || 0;
+      const quantity = p.currentQuantity || 0;
+      return sum + (price * quantity);
+    }, 0);
     
     const statusBreakdown = {
       'en-stock': clientProducts.filter(p => p.status === 'en-stock').length,

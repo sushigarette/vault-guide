@@ -1,24 +1,83 @@
-# Logs
-logs
+# Dependencies
+node_modules/
+bun.lockb
+package-lock.json
+
+# Build outputs
+dist/
+build/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+
+# iOS Application (ne pas partager)
+MHStock/
+
+# Testing
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+
+# CSV/JSON data files (keep formatted ones)
+Stock.csv
+stock-converted.json
+
+# Scripts temporaires
+convert-stock-to-csv-fixed.cjs
+analyze-prices.js
+clean-db.js
+clean-preferences.js
+convert-stock-to-json.js
+test-price-logic.js
+test-prix-fix.csv
+
+# Documentation non essentielle
+AJOUT-FILTRE-AFFECTATION.md
+AMELIORATION-GRAPHIQUE-RAPPORTS.md
+CORRECTION-FORMAT-ETIQUETTES.md
+CORRECTION-OVERFLOW.md
+CORRECTION-PRIX.md
+CORRECTION-QR-CODES.md
+CORRECTION-VALEURS-TOTALES.md
+CORRECTION-VISUALISEUR-IMPRESSION.md
+DEPLOYMENT.md
+FILTRES-MULTIPLES-CHECKBOXES.md
+INSTRUCTIONS-EXCEL.md
+NOUVELLE-PAGE-QR-CODES.md
+OPTIMISATION-ETIQUETTES.md
+QR_CODE_GUIDE.md
+RECAPITULATIF-CHANGEMENTS.md
+REFONTE-GRAPHIQUES-MATERIEL.md
+REORGANISATION-MODALS.md
+REORGANISATION-PAGE-DETAIL.md
+SOLUTION-FINALE-AMOUNT.md
+SUPPRESSION-AMOUNT.md
+
+# PDFs
+modelprint.pdf
+
+# SQL temporaires
+clean-database.sql
+
+# Nginx configs
+nginx-vault-guide.conf
+
+# Build scripts
+build-production.sh

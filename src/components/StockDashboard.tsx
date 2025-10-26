@@ -78,9 +78,10 @@ export const StockDashboard = ({
 
   // Calculer les statistiques
   const totalValue = products.reduce((sum, product) => {
-    // Utiliser amount (montant total) pour afficher la valeur totale
-    const value = product.amount || 0;
-    return sum + value;
+    // Utiliser purchasePriceHt * currentQuantity pour calculer la valeur totale
+    const price = product.purchasePriceHt || 0;
+    const quantity = product.currentQuantity || 0;
+    return sum + (price * quantity);
   }, 0);
   
   const byStatus = products.reduce((acc, product) => {

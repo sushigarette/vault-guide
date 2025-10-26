@@ -1,27 +1,24 @@
 export interface Product {
   id: string;
-  serialNumber: string;
-  parcNumber?: string;
-  brand: string;
-  model: string;
-  equipmentType: 'ordinateur' | 'imprimante' | 'claviers_souris' | 'switch' | 'router' | 'borne_wifi' | 'ecran' | 'station_ecrans' | 'chargeur_universelle';
+  serialNumber: string; // N° SERIE
+  brand: string; // MARQUE
+  model: string; // MODELE ou DESCRIPTION
+  equipmentType: 'accessoires' | 'borne_wifi' | 'casque_audio' | 'chargeur_tel' | 'chargeur_universel' | 
+                 'ecran_pc' | 'ecran_tv' | 'imprimante' | 'kit_clavier_souris' | 'visioconf' | 
+                 'mobilier' | 'uc' | 'pc_portable' | 'routeur' | 'sacoche' | 'station_accueil' | 
+                 'station_ecrans' | 'tel_mobile' | 'webcam'; // TYPE MATERIEL
   status: 'EN_STOCK' | 'SAV' | 'EN_UTILISATION' | 'HS';
-  assignment?: string; // Nom du collaborateur (ex: "AÏSSA ABDI Djanet", "CARDENAS Lionel", etc.)
-  usageDurationYears?: number;
-  entryDate?: string;
-  supplier?: string;
-  invoiceNumber?: string;
+  assignment?: string; // AFFECTATION - Nom du collaborateur
+  entryDate?: string; // DATE ENTREE
+  supplier?: string; // FOURNISSEUR
+  invoiceNumber?: string; // N° FACTURE
+  purchasePriceHt?: number; // PRIX ACHAT HT
+  usageDurationMonths?: number; // DUREE PROBABLE D'UTILISATION en mois
+  reevaluationDate?: string; // DATE REEVALUATION
   quantity: number;
-  purchasePriceHt?: number;
-  amount?: number;
-  exitDate?: string;
-  exitQuantity?: number;
-  exitUnitPriceHt?: number;
-  exitAmount?: number;
   currentQuantity: number;
-  currentValue?: number;
-  comments?: string;
   qrCode?: string; // URL complète vers la page produit
+  comments?: string;
   createdAt: Date;
   updatedAt: Date;
 }

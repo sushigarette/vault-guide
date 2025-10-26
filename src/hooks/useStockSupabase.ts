@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Product, StockMovement, StockStats, User, ImportResult, ProductModification, EquipmentType, Supplier } from '@/types/stock';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from './useAuth';
+import * as XLSX from 'xlsx';
 
 export const useStockSupabase = () => {
   const { user } = useAuth();
@@ -63,25 +64,19 @@ export const useStockSupabase = () => {
       const formattedProducts: Product[] = allProducts.map(product => ({
         id: product.id,
         serialNumber: product.serial_number,
-        parcNumber: product.parc_number,
         brand: product.brand,
         model: product.model,
         equipmentType: product.equipment_type as Product['equipmentType'],
         status: product.status as Product['status'],
         assignment: product.assignment || undefined,
-        usageDurationYears: product.usage_duration_years,
         entryDate: product.entry_date,
         supplier: product.supplier,
         invoiceNumber: product.invoice_number,
-        quantity: product.quantity,
         purchasePriceHt: product.purchase_price_ht,
-        amount: product.amount,
-        exitDate: product.exit_date,
-        exitQuantity: product.exit_quantity,
-        exitUnitPriceHt: product.exit_unit_price_ht,
-        exitAmount: product.exit_amount,
+        usageDurationMonths: product.usage_duration_months,
+        reevaluationDate: product.reevaluation_date,
+        quantity: product.quantity,
         currentQuantity: product.current_quantity,
-        currentValue: product.current_value,
         comments: product.comments,
         qrCode: `${window.location.origin}/product/${product.id}`,
         createdAt: new Date(product.created_at),
@@ -305,8 +300,6 @@ export const useStockSupabase = () => {
       const purchasePrice = productData.purchasePriceHt || 0;
       const quantity = productData.quantity || 1;
       const currentQuantity = productData.currentQuantity || 1;
-      const amount = purchasePrice * quantity;
-      const calculatedCurrentValue = amount * (currentQuantity / quantity);
 
       // Générer un numéro de série unique
       let serialNumber;
@@ -338,25 +331,19 @@ export const useStockSupabase = () => {
         .from('products')
         .insert({
           serial_number: serialNumber,
-          parc_number: productData.parcNumber,
           brand: productData.brand,
           model: productData.model,
           equipment_type: productData.equipmentType,
           status: productData.status,
           assignment: productData.assignment || null,
-          usage_duration_years: productData.usageDurationYears,
           entry_date: productData.entryDate || null,
           supplier: productData.supplier,
-          invoice_number: productData.invoice_number,
-          quantity: productData.quantity,
+          invoice_number: productData.invoiceNumber,
           purchase_price_ht: productData.purchasePriceHt,
-          amount: productData.amount,
-          exit_date: productData.exitDate || null,
-          exit_quantity: productData.exitQuantity,
-          exit_unit_price_ht: productData.exitUnitPriceHt,
-          exit_amount: productData.exitAmount,
+          usage_duration_months: productData.usageDurationMonths,
+          reevaluation_date: productData.reevaluationDate || null,
+          quantity: productData.quantity,
           current_quantity: productData.currentQuantity,
-          current_value: calculatedCurrentValue,
           comments: productData.comments,
         })
         .select()
@@ -367,25 +354,19 @@ export const useStockSupabase = () => {
       const newProduct: Product = {
         id: data.id,
         serialNumber: data.serial_number,
-        parcNumber: data.parc_number,
         brand: data.brand,
         model: data.model,
         equipmentType: data.equipment_type as Product['equipmentType'],
         status: data.status as Product['status'],
         assignment: data.assignment,
-        usageDurationYears: data.usage_duration_years,
         entryDate: data.entry_date,
         supplier: data.supplier,
         invoiceNumber: data.invoice_number,
-        quantity: data.quantity,
         purchasePriceHt: data.purchase_price_ht,
-        amount: data.amount,
-        exitDate: data.exit_date,
-        exitQuantity: data.exit_quantity,
-        exitUnitPriceHt: data.exit_unit_price_ht,
-        exitAmount: data.exit_amount,
+        usageDurationMonths: data.usage_duration_months,
+        reevaluationDate: data.reevaluation_date,
+        quantity: data.quantity,
         currentQuantity: data.current_quantity,
-        currentValue: data.current_value,
         comments: data.comments,
         qrCode: `${window.location.origin}/product/${data.id}`,
         createdAt: new Date(data.created_at),
@@ -416,33 +397,21 @@ export const useStockSupabase = () => {
       const updateData: any = {};
       
       if (productData.serialNumber !== undefined) updateData.serial_number = productData.serialNumber;
-      if (productData.parcNumber !== undefined) updateData.parc_number = productData.parcNumber;
       if (productData.brand !== undefined) updateData.brand = productData.brand;
       if (productData.model !== undefined) updateData.model = productData.model;
       if (productData.equipmentType !== undefined) updateData.equipment_type = productData.equipmentType;
       if (productData.status !== undefined) updateData.status = productData.status;
       if (productData.assignment !== undefined) updateData.assignment = productData.assignment || null;
-      if (productData.usageDurationYears !== undefined) updateData.usage_duration_years = productData.usageDurationYears;
       if (productData.entryDate !== undefined) updateData.entry_date = productData.entryDate || null;
       if (productData.supplier !== undefined) updateData.supplier = productData.supplier;
       if (productData.invoiceNumber !== undefined) updateData.invoice_number = productData.invoiceNumber;
-      if (productData.quantity !== undefined) updateData.quantity = productData.quantity;
       if (productData.purchasePriceHt !== undefined) updateData.purchase_price_ht = productData.purchasePriceHt;
-      if (productData.amount !== undefined) updateData.amount = productData.amount;
-      if (productData.exitDate !== undefined) updateData.exit_date = productData.exitDate || null;
-      if (productData.exitQuantity !== undefined) updateData.exit_quantity = productData.exitQuantity;
-      if (productData.exitUnitPriceHt !== undefined) updateData.exit_unit_price_ht = productData.exitUnitPriceHt;
-      if (productData.exitAmount !== undefined) updateData.exit_amount = productData.exitAmount;
+      if (productData.usageDurationMonths !== undefined) updateData.usage_duration_months = productData.usageDurationMonths;
+      if (productData.reevaluationDate !== undefined) updateData.reevaluation_date = productData.reevaluationDate || null;
+      if (productData.quantity !== undefined) updateData.quantity = productData.quantity;
       if (productData.currentQuantity !== undefined) updateData.current_quantity = productData.currentQuantity;
       if (productData.comments !== undefined) updateData.comments = productData.comments;
 
-      // Recalculer automatiquement la valeur actuelle
-      const finalPurchasePrice = productData.purchasePriceHt !== undefined ? productData.purchasePriceHt : (oldProduct?.purchasePriceHt || 0);
-      const finalQuantity = productData.quantity !== undefined ? productData.quantity : (oldProduct?.quantity || 1);
-      const finalCurrentQuantity = productData.currentQuantity !== undefined ? productData.currentQuantity : (oldProduct?.currentQuantity || 1);
-      const finalAmount = finalPurchasePrice * finalQuantity;
-      const calculatedCurrentValue = finalAmount * (finalCurrentQuantity / finalQuantity);
-      updateData.current_value = calculatedCurrentValue;
 
       const { data, error } = await supabase
         .from('products')
@@ -456,25 +425,19 @@ export const useStockSupabase = () => {
       const updatedProduct: Product = {
         id: data.id,
         serialNumber: data.serial_number,
-        parcNumber: data.parc_number,
         brand: data.brand,
         model: data.model,
         equipmentType: data.equipment_type as Product['equipmentType'],
         status: data.status as Product['status'],
         assignment: data.assignment,
-        usageDurationYears: data.usage_duration_years,
         entryDate: data.entry_date,
         supplier: data.supplier,
         invoiceNumber: data.invoice_number,
-        quantity: data.quantity,
         purchasePriceHt: data.purchase_price_ht,
-        amount: data.amount,
-        exitDate: data.exit_date,
-        exitQuantity: data.exit_quantity,
-        exitUnitPriceHt: data.exit_unit_price_ht,
-        exitAmount: data.exit_amount,
+        usageDurationMonths: data.usage_duration_months,
+        reevaluationDate: data.reevaluation_date,
+        quantity: data.quantity,
         currentQuantity: data.current_quantity,
-        currentValue: data.current_value,
         comments: data.comments,
         qrCode: `${window.location.origin}/product/${data.id}`,
         createdAt: new Date(data.created_at),
@@ -491,25 +454,19 @@ export const useStockSupabase = () => {
       if (oldProduct) {
         const fieldMappings = {
           serialNumber: 'N° de série',
-          parcNumber: 'Référence interne',
           brand: 'Marque',
           model: 'Modèle',
           equipmentType: 'Type de matériel',
           status: 'Statut',
           assignment: 'Affectation',
-          usageDurationYears: 'Durée d\'utilisation',
           entryDate: 'Date d\'entrée',
           supplier: 'Fournisseur',
           invoiceNumber: 'N° de facture',
-          quantity: 'Quantité',
           purchasePriceHt: 'Prix d\'achat HT',
-          amount: 'Montant total',
-          exitDate: 'Date de sortie',
-          exitQuantity: 'Quantité sortie',
-          exitUnitPriceHt: 'Prix unitaire sortie',
-          exitAmount: 'Montant sortie',
+          usageDurationMonths: 'Durée d\'utilisation en mois',
+          reevaluationDate: 'Date de réévaluation',
+          quantity: 'Quantité',
           currentQuantity: 'Quantité actuelle',
-          currentValue: 'Valeur actuelle',
           comments: 'Commentaires'
         };
 
@@ -647,12 +604,13 @@ export const useStockSupabase = () => {
   // Importer des produits
   const importProducts = async (file: File): Promise<ImportResult> => {
     try {
-      const text = await file.text();
       let data: any[] = [];
 
       if (file.name.endsWith('.json')) {
+        const text = await file.text();
         data = JSON.parse(text);
       } else if (file.name.endsWith('.csv')) {
+        const text = await file.text();
         const lines = text.split('\n');
         const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
         data = lines.slice(1).map(line => {
@@ -663,6 +621,25 @@ export const useStockSupabase = () => {
           });
           return obj;
         });
+      } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        // Import Excel avec la bibliothèque xlsx
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const sheetName = workbook.SheetNames[0]; // Prendre la première feuille
+        const worksheet = workbook.Sheets[sheetName];
+        data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        // Convertir en format objet avec en-têtes
+        if (data.length > 0) {
+          const headers = data[0] as string[];
+          data = data.slice(1).map((row: any[]) => {
+            const obj: any = {};
+            headers.forEach((header, index) => {
+              obj[header] = row[index] || '';
+            });
+            return obj;
+          });
+        }
       }
 
       const results: ImportResult = {
@@ -675,7 +652,19 @@ export const useStockSupabase = () => {
       for (const item of data) {
         try {
           // Fonction pour convertir les dates du format DD/MM/YYYY vers YYYY-MM-DD
-          const convertDate = (dateStr: string): string | null => {
+          const convertDate = (dateValue: any): string | null => {
+            // Si la valeur est null, undefined ou vide
+            if (!dateValue) return null;
+            
+            // Si c'est déjà un objet Date
+            if (dateValue instanceof Date) {
+              return dateValue.toISOString().split('T')[0];
+            }
+            
+            // Convertir en chaîne de caractères
+            const dateStr = String(dateValue);
+            
+            // Si c'est une chaîne vide après conversion
             if (!dateStr || dateStr.trim() === '') return null;
             
             // Si c'est déjà au format YYYY-MM-DD, le retourner tel quel
@@ -689,73 +678,146 @@ export const useStockSupabase = () => {
               return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
             }
             
+            // Si c'est au format DD/MM/YY (année sur 2 chiffres), le convertir
+            if (/^\d{1,2}\/\d{1,2}\/\d{2}$/.test(dateStr)) {
+              const [day, month, year] = dateStr.split('/');
+              // Convertir l'année sur 2 chiffres en 4 chiffres
+              const fullYear = parseInt(year) < 50 ? 2000 + parseInt(year) : 1900 + parseInt(year);
+              return `${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            }
+            
             // Si c'est juste une année (ex: "1385"), retourner null
             if (/^\d{4}$/.test(dateStr) && parseInt(dateStr) < 1900) {
               return null;
             }
             
+            // Si c'est un nombre (timestamp Excel), essayer de le convertir
+            if (!isNaN(Number(dateStr)) && Number(dateStr) > 25569) { // 25569 = 1er janvier 1970 en jours Excel
+              const excelDate = new Date((Number(dateStr) - 25569) * 86400 * 1000);
+              if (!isNaN(excelDate.getTime())) {
+                return excelDate.toISOString().split('T')[0];
+              }
+            }
+            
             return null;
           };
 
-          // Fonction pour normaliser le type de matériel
+          // Fonction pour normaliser le type de matériel selon les nouvelles catégories
           const normalizeEquipmentType = (type: string): string => {
-            if (!type) return 'ordinateur';
+            if (!type) return 'pc_portable';
             
             const normalizedType = type.toLowerCase().trim();
             
-            // Mapping des types courants vers les types autorisés
+            // Mapping des types vers les nouvelles catégories
             const typeMapping: { [key: string]: string } = {
-              'ordinateur': 'ordinateur',
-              'pc': 'ordinateur',
-              'pc portable': 'ordinateur',
-              'laptop': 'ordinateur',
+              'accessoires': 'accessoires',
+              'borne wifi': 'borne_wifi',
+              'borne_wifi': 'borne_wifi',
+              'casque audio': 'casque_audio',
+              'casque_audio': 'casque_audio',
+              'chargeur tel': 'chargeur_tel',
+              'chargeur_tel': 'chargeur_tel',
+              'chargeur universel': 'chargeur_universel',
+              'chargeur_universel': 'chargeur_universel',
+              'ecran pc': 'ecran_pc',
+              'ecran_pc': 'ecran_pc',
+              'écran pc': 'ecran_pc',
+              'moniteur': 'ecran_pc',
+              'ecran tv': 'ecran_tv',
+              'écran tv': 'ecran_tv',
+              'tv': 'ecran_tv',
               'imprimante': 'imprimante',
               'printer': 'imprimante',
-              'clavier': 'claviers_souris',
-              'souris': 'claviers_souris',
-              'claviers/souris': 'claviers_souris',
-              'switch': 'switch',
-              'routeur': 'router',
-              'router': 'router',
-              'borne wifi': 'borne_wifi',
-              'wifi': 'borne_wifi',
-              'écran': 'ecran',
-              'moniteur': 'ecran',
-              'station écrans': 'station_ecrans',
-              'chargeur': 'chargeur_universelle',
-              'chargeur universelle': 'chargeur_universelle',
-              'mobile': 'mobile',
-              'smartphone': 'mobile',
-              'tablette': 'mobile',
-              'phone': 'mobile',
-              'tablet': 'mobile'
+              'kit clavier/souris': 'kit_clavier_souris',
+              'kit_clavier_souris': 'kit_clavier_souris',
+              'clavier': 'kit_clavier_souris',
+              'souris': 'kit_clavier_souris',
+              'visioconf': 'visioconf',
+              'visioconférence': 'visioconf',
+              'mobilier': 'mobilier',
+              'bureau': 'mobilier',
+              'chaise': 'mobilier',
+              'uc': 'uc',
+              'unité centrale': 'uc',
+              'pc portable': 'pc_portable',
+              'pc_portable': 'pc_portable',
+              'laptop': 'pc_portable',
+              'ordinateur portable': 'pc_portable',
+              'routeur': 'routeur',
+              'router': 'routeur',
+              'sacoche': 'sacoche',
+              'station d\'accueil': 'station_accueil',
+              'station_accueil': 'station_accueil',
+              'station d\'écrans': 'station_ecrans',
+              'station_ecrans': 'station_ecrans',
+              'tel mobile': 'tel_mobile',
+              'tel_mobile': 'tel_mobile',
+              'mobile': 'tel_mobile',
+              'smartphone': 'tel_mobile',
+              'webcam': 'webcam',
+              'caméra': 'webcam'
             };
             
-            return typeMapping[normalizedType] || 'ordinateur';
+            return typeMapping[normalizedType] || 'pc_portable';
           };
 
-          // Mapper les champs selon le nouveau modèle
+          // Fonction pour générer des données FAKE si manquantes
+          const generateFakeData = (field: string, value: any, type: 'string' | 'number' | 'date' = 'string'): any => {
+            // Vérifier si la valeur existe et n'est pas vide
+            if (value !== null && value !== undefined && value !== '') {
+              // Pour les chaînes, vérifier qu'elles ne sont pas vides après trim
+              if (type === 'string' && String(value).trim() !== '') {
+                return String(value);
+              }
+              // Pour les nombres, vérifier qu'ils sont valides
+              if (type === 'number' && !isNaN(Number(value))) {
+                return Number(value);
+              }
+              // Pour les dates, vérifier qu'elles sont valides
+              if (type === 'date' && value) {
+                return value;
+              }
+            }
+            
+            const timestamp = Date.now();
+            const randomId = Math.random().toString(36).substring(2, 8);
+            
+            switch (type) {
+              case 'number':
+                return null; // Ne pas générer de valeurs FAKE pour les nombres
+              case 'date':
+                return new Date().toISOString().split('T')[0]; // Date du jour
+              default:
+                return `FAKE_${field.toUpperCase()}_${randomId}`;
+            }
+          };
+
+          // Mapper les champs selon le nouveau modèle (11 colonnes) - TOUS OBLIGATOIRES
           const productData = {
-            serialNumber: item['N° DE SERIE'] || item.serialNumber || '',
-            parcNumber: item['N° PARC'] || item.parcNumber || '',
-            brand: item['MARQUE'] || item.brand || '',
-            model: item['MODELE'] || item.model || '',
-            equipmentType: normalizeEquipmentType(item['TYPE DE MATERIEL'] || item.equipmentType || 'ordinateur'),
-            status: item['STATUT'] || item.status || 'EN_STOCK',
-            assignment: item['AFFECTATION'] || item.assignment || null,
-            usageDurationYears: parseInt(item['DUREE UTILISATION ANNEE']) || item.usageDurationYears || null,
-            entryDate: convertDate(item['DATE RECEPTION'] || item.entryDate || ''),
-            supplier: item['FOURNISSEUR'] || item.supplier || '',
-            invoiceNumber: item['N° FACTURE'] || item.invoiceNumber || '',
-            quantity: parseInt(item['QUANTITE']) || item.quantity || 1,
-            purchasePriceHt: parseFloat(item['PRIX ACHAT HT']) || item.purchasePriceHt || 0,
-            amount: parseFloat(item['MONTANT TOTAL']) || item.amount || 0,
-            exitDate: convertDate(item['DATE SORTIE'] || item.exitDate || ''),
-            exitQuantity: parseInt(item['QUANTITE SORTIE']) || item.exitQuantity || null,
-            exitUnitPriceHt: parseFloat(item['PRIX UNITAIRE SORTIE HT']) || item.exitUnitPriceHt || null,
-            exitAmount: parseFloat(item['MONTANT SORTIE']) || item.exitAmount || 0,
-            currentQuantity: parseInt(item['QUANTITE ACTUELLE']) || item.currentQuantity || 1,
-            currentValue: 0, // Sera calculé automatiquement
+            serialNumber: generateFakeData('serial', item['N° SERIE'] || item['N° DE SERIE'] || item.serialNumber),
+            brand: generateFakeData('brand', item['MARQUE'] || item.brand),
+            model: generateFakeData('model', item['MODELE ou DESCRIPTION'] || item['MODELE'] || item.model),
+            equipmentType: normalizeEquipmentType(item['TYPE MATERIEL'] || item['TYPE DE MATERIEL'] || item.equipmentType || 'pc_portable'),
+            assignment: generateFakeData('assignment', item['AFFECTATION'] || item.assignment),
+            entryDate: convertDate(item['DATE ENTREE'] || item['DATE RECEPTION'] || item.entryDate) || generateFakeData('entry_date', '', 'date'),
+            supplier: generateFakeData('supplier', item['FOURNISSEUR'] || item.supplier),
+            invoiceNumber: generateFakeData('invoice', item['N° FACTURE'] || item.invoiceNumber),
+            purchasePriceHt: (() => {
+              const price = item['PRIX ACHAT HT'];
+              if (!price || price === '') return null;
+              const parsed = parseFloat(price);
+              return isNaN(parsed) ? null : parsed;
+            })(),
+            usageDurationMonths: (() => {
+              const duration = item['DUREE PROBABLE D\'UTILISATION en mois'];
+              if (!duration || duration === '' || duration === '0') return null;
+              const parsed = parseInt(duration);
+              return isNaN(parsed) ? null : parsed;
+            })(),
+            reevaluationDate: convertDate(item['DATE REEVALUATION'] || item.reevaluationDate) || generateFakeData('reeval_date', '', 'date'),
+            quantity: 1, // Par défaut 1 pour chaque produit
+            currentQuantity: 1, // Par défaut 1 pour chaque produit
+            status: 'EN_STOCK', // Par défaut en stock
             comments: item['COMMENTAIRES'] || item.comments || '',
           };
 

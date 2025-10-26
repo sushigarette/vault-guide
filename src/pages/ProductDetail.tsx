@@ -316,113 +316,109 @@ export const ProductDetail = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">N° de série</label>
-                    <p className="font-mono text-lg">{product.serialNumber}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Référence interne</label>
-                    <p className="font-mono text-lg">{product.parcNumber || '-'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Marque</label>
-                    <p className="text-lg">{product.brand}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Modèle</label>
-                    <p className="text-lg">{product.model}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Type de matériel</label>
-                    <Badge variant="outline" className="text-sm">
-                      {product.equipmentType ? 
-                        product.equipmentType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 
-                        'Non défini'
-                      }
-                    </Badge>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Statut</label>
-                    <Badge variant={stockInfo.color as any}>
-                      {stockInfo.status}
-                    </Badge>
+                {/* Informations de base */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Informations de base</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">TYPE MATERIEL</label>
+                      <Badge variant="outline" className="text-sm">
+                        {product.equipmentType ? 
+                          product.equipmentType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 
+                          'Non défini'
+                        }
+                      </Badge>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">MARQUE</label>
+                      <p className="text-lg">{product.brand || '-'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">MODELE ou DESCRIPTION</label>
+                      <p className="text-lg">{product.model || '-'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">N° SERIE</label>
+                      <p className="font-mono text-lg">{product.serialNumber || '-'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Statut</label>
+                      <Badge variant={stockInfo.color as any}>
+                        {stockInfo.status}
+                      </Badge>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Affectation (Collaborateur)</label>
+                      <p className="text-lg flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        {product.assignment || '-'}
+                      </p>
+                    </div>
                   </div>
                 </div>
                 
+                <Separator />
                 
-                {product.supplier && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Fournisseur</label>
-                    <p className="text-lg flex items-center gap-2">
-                      <Building className="h-4 w-4" />
-                      {product.supplier}
-                    </p>
+                {/* Informations complémentaires */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Informations complémentaires</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">FOURNISSEUR</label>
+                      <p className="text-lg flex items-center gap-2">
+                        <Building className="h-4 w-4" />
+                        {product.supplier || '-'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">DATE ENTREE</label>
+                      <p className="text-lg flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        {product.entryDate ? new Date(product.entryDate).toLocaleDateString('fr-FR') : '-'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">N° FACTURE</label>
+                      <p className="text-lg flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        {product.invoiceNumber || '-'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">PRIX ACHAT HT (€)</label>
+                      <p className="text-lg flex items-center gap-2">
+                        <DollarSign className="h-4 w-4" />
+                        {product.purchasePriceHt ? 
+                          new Intl.NumberFormat('fr-FR', {
+                            style: 'currency',
+                            currency: 'EUR',
+                          }).format(product.purchasePriceHt) : '-'
+                        }
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">DUREE PROBABLE D'UTILISATION (mois)</label>
+                      <p className="text-lg">{product.usageDurationMonths ? `${product.usageDurationMonths} mois` : '-'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">DATE REEVALUATION</label>
+                      <p className="text-lg flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        {product.reevaluationDate ? new Date(product.reevaluationDate).toLocaleDateString('fr-FR') : '-'}
+                      </p>
+                    </div>
                   </div>
-                )}
-                
-                {product.invoiceNumber && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">N° de facture</label>
-                    <p className="text-lg flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      {product.invoiceNumber}
-                    </p>
-                  </div>
-                )}
-                
-                {product.assignment && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Affectation</label>
-                    <p className="text-lg flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      {product.assignment}
-                    </p>
-                  </div>
-                )}
-                
-                {product.comments && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Commentaires</label>
-                    <p className="text-lg">{product.comments}</p>
-                  </div>
-                )}
+                  
+                  {product.comments && (
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Commentaires</label>
+                      <p className="text-lg mt-1 p-3 bg-muted rounded-lg">{product.comments}</p>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
-            {/* Informations d'utilisation */}
-            {(product.usageDurationYears || product.entryDate || product.exitDate) && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    Informations d'utilisation
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    {product.usageDurationYears && (
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Durée d'utilisation</label>
-                        <p className="text-lg">{product.usageDurationYears} année{product.usageDurationYears > 1 ? 's' : ''}</p>
-                      </div>
-                    )}
-                    {product.entryDate && (
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Date de réception</label>
-                        <p className="text-lg">{new Date(product.entryDate).toLocaleDateString('fr-FR')}</p>
-                      </div>
-                    )}
-                    {product.exitDate && (
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Date de sortie</label>
-                        <p className="text-lg">{new Date(product.exitDate).toLocaleDateString('fr-FR')}</p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
 
             {/* Historique des modifications */}
@@ -479,32 +475,6 @@ export const ProductDetail = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Statut du stock */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <StockIcon className="h-5 w-5" />
-                  Statut du stock
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold mb-2">{product.currentQuantity}</div>
-                  <Badge variant={stockInfo.color as any} className="mb-2">
-                    {stockInfo.status === 'En stock' ? (
-                      <div className="text-center">
-                        <div>EN</div>
-                        <div>STOCK</div>
-                      </div>
-                    ) : (
-                      stockInfo.status
-                    )}
-                  </Badge>
-                  <p className="text-sm text-muted-foreground">{stockInfo.description}</p>
-                </div>
-                
-              </CardContent>
-            </Card>
 
             {/* Codes d'identification */}
             <Card>

@@ -143,9 +143,9 @@ export const StockMovementForm = ({
                         {products.map((product) => (
                           <SelectItem key={product.id} value={product.id}>
                             <div className="flex flex-col">
-                              <span>{product.name}</span>
+                              <span>{product.serialNumber || product.brand || product.model || 'Produit sans nom'}</span>
                               <span className="text-sm text-muted-foreground">
-                                SKU: {product.sku} | Stock: {product.quantity}
+                                {product.brand && product.model ? `${product.brand} ${product.model}` : ''} | Stock: {product.currentQuantity}
                               </span>
                             </div>
                           </SelectItem>
@@ -194,24 +194,24 @@ export const StockMovementForm = ({
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground">Stock actuel:</span>
+                    <span className="ml-2 font-medium">{selectedProduct.currentQuantity}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Quantité totale:</span>
                     <span className="ml-2 font-medium">{selectedProduct.quantity}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Stock minimum:</span>
-                    <span className="ml-2 font-medium">{selectedProduct.minStock}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Prix unitaire:</span>
+                    <span className="text-muted-foreground">Prix d'achat:</span>
                     <span className="ml-2 font-medium">
-                      {new Intl.NumberFormat('fr-FR', {
+                      {selectedProduct.purchasePriceHt ? new Intl.NumberFormat('fr-FR', {
                         style: 'currency',
                         currency: 'EUR',
-                      }).format(selectedProduct.price)}
+                      }).format(selectedProduct.purchasePriceHt) : 'Non défini'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Catégorie:</span>
-                    <span className="ml-2 font-medium">{selectedProduct.category}</span>
+                    <span className="text-muted-foreground">Type:</span>
+                    <span className="ml-2 font-medium">{selectedProduct.equipmentType || 'Non défini'}</span>
                   </div>
                 </div>
               </div>

@@ -25,27 +25,26 @@ import { useCollaborators } from '@/hooks/useCollaborators';
 import { useStockSupabase } from '@/hooks/useStockSupabase';
 
 const productSchema = z.object({
-  serialNumber: z.string().min(1, 'Le numéro de série est requis'),
-  parcNumber: z.string().nullable().optional(),
-  brand: z.string().min(1, 'La marque est requise'),
-  model: z.string().min(1, 'Le modèle est requis'),
-  equipmentType: z.string().nullable().optional(),
-  status: z.enum(['EN_STOCK', 'SAV', 'EN_UTILISATION', 'HS']).nullable().optional(),
-  assignment: z.string().nullable().optional(),
-  usageDurationYears: z.number().nullable().optional(),
-  entryDate: z.string().nullable().optional(),
-  supplier: z.string().nullable().optional(),
-  invoiceNumber: z.string().nullable().optional(),
-  quantity: z.number().min(1, 'La quantité doit être au moins 1'),
-  purchasePriceHt: z.number().nullable().optional(),
-  amount: z.number().nullable().optional(),
-  exitDate: z.string().nullable().optional(),
-  exitQuantity: z.number().nullable().optional(),
-  exitUnitPriceHt: z.number().nullable().optional(),
-  exitAmount: z.number().nullable().optional(),
-  currentQuantity: z.number().min(0, 'La quantité actuelle ne peut pas être négative'),
-  currentValue: z.number().nullable().optional(),
-  comments: z.string().nullable().optional(),
+  serialNumber: z.string().optional(), // N° SERIE - optionnel
+  brand: z.string().optional(), // MARQUE - optionnel
+  model: z.string().optional(), // MODELE ou DESCRIPTION - optionnel
+  equipmentType: z.enum([
+    'accessoires', 'borne_wifi', 'casque_audio', 'chargeur_tel', 'chargeur_universel',
+    'ecran_pc', 'ecran_tv', 'imprimante', 'kit_clavier_souris', 'visioconf',
+    'mobilier', 'uc', 'pc_portable', 'routeur', 'sacoche', 'station_accueil',
+    'station_ecrans', 'tel_mobile', 'webcam'
+  ]).optional(), // TYPE MATERIEL - optionnel
+  assignment: z.string().optional(), // AFFECTATION - optionnel
+  entryDate: z.string().optional(), // DATE ENTREE - optionnel
+  supplier: z.string().optional(), // FOURNISSEUR - optionnel
+  invoiceNumber: z.string().optional(), // N° FACTURE - optionnel
+  purchasePriceHt: z.number().optional(), // PRIX ACHAT HT - optionnel
+  usageDurationMonths: z.number().optional(), // DUREE PROBABLE D'UTILISATION en mois - optionnel
+  reevaluationDate: z.string().optional(), // DATE REEVALUATION - optionnel
+  quantity: z.number().min(1, 'La quantité doit être au moins 1').default(1),
+  currentQuantity: z.number().min(0, 'La quantité actuelle ne peut pas être négative').default(1),
+  status: z.enum(['EN_STOCK', 'SAV', 'EN_UTILISATION', 'HS']).default('EN_STOCK'),
+  comments: z.string().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -69,24 +68,17 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
       serialNumber: '',
       brand: '',
       model: '',
-      quantity: 1,
-      currentQuantity: 1,
-      // Champs optionnels - pas de valeurs par défaut
       equipmentType: undefined,
-      status: undefined,
-      parcNumber: undefined,
       assignment: undefined,
-      usageDurationYears: undefined,
       entryDate: undefined,
       supplier: undefined,
       invoiceNumber: undefined,
       purchasePriceHt: undefined,
-      amount: undefined,
-      exitDate: undefined,
-      exitQuantity: undefined,
-      exitUnitPriceHt: undefined,
-      exitAmount: undefined,
-      currentValue: undefined,
+      usageDurationMonths: undefined,
+      reevaluationDate: undefined,
+      quantity: 1,
+      currentQuantity: 1,
+      status: 'EN_STOCK',
       comments: undefined,
     },
   });
@@ -95,63 +87,26 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
   useEffect(() => {
     if (product) {
       const formData = {
-        // Champs obligatoires - utiliser les valeurs du produit ou des valeurs par défaut
         serialNumber: product.serialNumber || '',
         brand: product.brand || '',
         model: product.model || '',
+        equipmentType: product.equipmentType || undefined,
+        assignment: product.assignment || undefined,
+        entryDate: product.entryDate || undefined,
+        supplier: product.supplier || undefined,
+        invoiceNumber: product.invoiceNumber || undefined,
+        purchasePriceHt: product.purchasePriceHt || undefined,
+        usageDurationMonths: product.usageDurationMonths || undefined,
+        reevaluationDate: product.reevaluationDate || undefined,
         quantity: product.quantity || 1,
         currentQuantity: product.currentQuantity || 1,
-        
-        // Champs optionnels - s'assurer qu'ils ont toujours une valeur par défaut
-        equipmentType: product.equipmentType || '',
-        status: product.status || '',
-        parcNumber: product.parcNumber || '',
-        assignment: product.assignment || '',
-        usageDurationYears: product.usageDurationYears || null,
-        entryDate: product.entryDate || '',
-        supplier: product.supplier || '',
-        invoiceNumber: product.invoiceNumber || '',
-        purchasePriceHt: product.purchasePriceHt || null,
-        amount: product.amount || null,
-        exitDate: product.exitDate || '',
-        exitQuantity: product.exitQuantity || null,
-        exitUnitPriceHt: product.exitUnitPriceHt || null,
-        exitAmount: product.exitAmount || null,
-        currentValue: product.currentValue || null,
-        comments: product.comments || '',
+        status: product.status || 'EN_STOCK',
+        comments: product.comments || undefined,
       };
       form.reset(formData);
-      // Calculer les montants après le reset
-      setTimeout(() => calculateAmounts(), 100);
     } else {
       // Réinitialiser avec les valeurs par défaut pour la création
-      const defaultData = {
-        serialNumber: '',
-        brand: '',
-        model: '',
-        quantity: 1,
-        currentQuantity: 1,
-        // Champs optionnels - pas de valeurs par défaut
-        equipmentType: undefined,
-        status: undefined,
-        parcNumber: undefined,
-        assignment: undefined,
-        usageDurationYears: undefined,
-        entryDate: undefined,
-        supplier: undefined,
-        invoiceNumber: undefined,
-        purchasePriceHt: undefined,
-        amount: undefined,
-        exitDate: undefined,
-        exitQuantity: undefined,
-        exitUnitPriceHt: undefined,
-        exitAmount: undefined,
-        currentValue: undefined,
-        comments: undefined,
-      };
-      form.reset(defaultData);
-      // Calculer les montants après le reset
-      setTimeout(() => calculateAmounts(), 100);
+      form.reset();
     }
   }, [product, form]);
 
@@ -236,21 +191,6 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
     onClose();
   };
 
-  // Calculer automatiquement le montant total et la valeur actuelle
-  const calculateAmounts = () => {
-    const purchasePrice = form.getValues('purchasePriceHt') || 0;
-    const quantity = form.getValues('quantity') || 1;
-    const currentQuantity = form.getValues('currentQuantity') || 1;
-    
-    // Montant total = prix d'achat × quantité
-    const amount = purchasePrice * quantity;
-    form.setValue('amount', Math.round(amount * 100) / 100);
-    
-    // Valeur actuelle = montant total × (quantité actuelle / quantité totale)
-    const currentValue = amount * (currentQuantity / quantity);
-    form.setValue('currentValue', Math.round(currentValue * 100) / 100);
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background">
@@ -262,34 +202,49 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6" key={product?.id || 'new'}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Informations de base */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Informations de base</h3>
                 
                 <FormField
                   control={form.control}
-                  name="serialNumber"
+                  name="equipmentType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Numéro de série *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="CND4494QN0" {...field} value={field.value || ""} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="parcNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Référence interne</FormLabel>
-                      <FormControl>
-                        <Input placeholder="REF001" {...field} value={field.value || ""} />
-                      </FormControl>
+                      <FormLabel>TYPE MATERIEL</FormLabel>
+                      <Select 
+                        onValueChange={(value) => field.onChange(value === "none" ? undefined : value)} 
+                        value={field.value || "none"}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner un type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">Aucun type</SelectItem>
+                          <SelectItem value="accessoires">Accessoires</SelectItem>
+                          <SelectItem value="borne_wifi">Borne Wifi</SelectItem>
+                          <SelectItem value="casque_audio">Casque audio</SelectItem>
+                          <SelectItem value="chargeur_tel">Chargeur tel</SelectItem>
+                          <SelectItem value="chargeur_universel">Chargeur universel</SelectItem>
+                          <SelectItem value="ecran_pc">Ecran PC</SelectItem>
+                          <SelectItem value="ecran_tv">Ecran TV</SelectItem>
+                          <SelectItem value="imprimante">Imprimante</SelectItem>
+                          <SelectItem value="kit_clavier_souris">Kit clavier/souris</SelectItem>
+                          <SelectItem value="visioconf">Visioconf</SelectItem>
+                          <SelectItem value="mobilier">Mobilier</SelectItem>
+                          <SelectItem value="uc">UC</SelectItem>
+                          <SelectItem value="pc_portable">PC Portable</SelectItem>
+                          <SelectItem value="routeur">Routeur</SelectItem>
+                          <SelectItem value="sacoche">Sacoche</SelectItem>
+                          <SelectItem value="station_accueil">Station d'accueil</SelectItem>
+                          <SelectItem value="station_ecrans">Station d'écrans</SelectItem>
+                          <SelectItem value="tel_mobile">Tel Mobile</SelectItem>
+                          <SelectItem value="webcam">Webcam</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -300,9 +255,9 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
                   name="brand"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Marque *</FormLabel>
+                      <FormLabel>MARQUE</FormLabel>
                       <FormControl>
-                        <Input placeholder="HP" {...field} value={field.value || ""} />
+                        <Input placeholder="CANON" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -314,9 +269,9 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
                   name="model"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Modèle *</FormLabel>
+                      <FormLabel>MODELE ou DESCRIPTION</FormLabel>
                       <FormControl>
-                        <Input placeholder="ELITEPAD" {...field} value={field.value || ""} />
+                        <Input placeholder="Imprimante ISENSYS MF443dw" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -325,33 +280,13 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
 
                 <FormField
                   control={form.control}
-                  name="equipmentType"
+                  name="serialNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type de matériel</FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(value === "none" ? undefined : value)} 
-                        value={field.value || "none"}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un type (optionnel)" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">Aucun type</SelectItem>
-                          {equipmentTypes
-                            .filter(type => type.isActive)
-                            .map((type) => (
-                            <SelectItem key={type.id} value={type.name}>
-                              {type.displayName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-muted-foreground">
-                        Optionnel : sélectionner un type de matériel de la liste
-                      </p>
+                      <FormLabel>N° SERIE</FormLabel>
+                      <FormControl>
+                        <Input placeholder="3514C008" {...field} value={field.value || ""} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -414,16 +349,30 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
                 />
               </div>
 
-              {/* Informations d'achat */}
+              {/* Informations complémentaires */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Informations d'achat</h3>
+                <h3 className="text-lg font-semibold">Informations complémentaires</h3>
                 
+                <FormField
+                  control={form.control}
+                  name="supplier"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>FOURNISSEUR</FormLabel>
+                      <FormControl>
+                        <Input placeholder="INMACWSTORE" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="entryDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date d'entrée</FormLabel>
+                      <FormLabel>DATE ENTREE</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} value={field.value || ""} />
                       </FormControl>
@@ -434,68 +383,12 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
 
                 <FormField
                   control={form.control}
-                  name="supplier"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fournisseur</FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(value === "none" ? undefined : value)} 
-                        value={field.value || "none"}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Choisir un fournisseur (optionnel)" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">Aucun fournisseur</SelectItem>
-                          {suppliers
-                            .filter(supplier => supplier.isActive)
-                            .map((supplier) => (
-                            <SelectItem key={supplier.id} value={supplier.name}>
-                              {supplier.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-muted-foreground">
-                        Optionnel : sélectionner un fournisseur de la liste
-                      </p>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="invoiceNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Numéro de facture</FormLabel>
+                      <FormLabel>N° FACTURE</FormLabel>
                       <FormControl>
-                        <Input placeholder="FAC2024001" {...field} value={field.value || ""} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="quantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Quantité *</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="1"
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(parseInt(e.target.value) || 1);
-                            calculateAmounts();
-                          }}
-                        />
+                        <Input placeholder="FAC-2022-001" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -507,17 +400,16 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
                   name="purchasePriceHt"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Prix d'achat HT (€)</FormLabel>
+                      <FormLabel>PRIX ACHAT HT (€)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           step="0.01"
-                          placeholder="620.00"
+                          placeholder="329.00"
                           {...field}
                           onChange={(e) => {
                             const value = e.target.value;
-                            field.onChange(value === '' ? null : parseFloat(value) || null);
-                            calculateAmounts();
+                            field.onChange(value === '' ? undefined : parseFloat(value) || undefined);
                           }}
                         />
                       </FormControl>
@@ -528,41 +420,15 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
 
                 <FormField
                   control={form.control}
-                  name="amount"
+                  name="usageDurationMonths"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Montant total (€) - Calculé automatiquement</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="620.00"
-                          {...field}
-                          readOnly
-                          className="bg-muted"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Informations d'utilisation */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Informations d'utilisation</h3>
-                
-                <FormField
-                  control={form.control}
-                  name="usageDurationYears"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Durée d'utilisation (années)</FormLabel>
+                      <FormLabel>DUREE PROBABLE D'UTILISATION (mois)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           min="1"
-                          placeholder="5"
+                          placeholder="60"
                           {...field}
                           onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
                         />
@@ -574,20 +440,12 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
 
                 <FormField
                   control={form.control}
-                  name="currentQuantity"
+                  name="reevaluationDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quantité actuelle *</FormLabel>
+                      <FormLabel>DATE REEVALUATION</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          min="0"
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(parseInt(e.target.value) || 0);
-                            calculateAmounts();
-                          }}
-                        />
+                        <Input type="date" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -596,18 +454,15 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
 
                 <FormField
                   control={form.control}
-                  name="currentValue"
+                  name="comments"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Valeur actuelle (€) - Calculée automatiquement</FormLabel>
+                      <FormLabel>Commentaires</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="620.00"
-                          {...field}
-                          readOnly
-                          className="bg-muted"
+                        <Textarea 
+                          placeholder="Commentaires sur le produit..." 
+                          {...field} 
+                          value={field.value || ""} 
                         />
                       </FormControl>
                       <FormMessage />
@@ -616,121 +471,15 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
                 />
               </div>
 
-              {/* Informations de sortie - seulement pour la modification */}
-              {product && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Informations de sortie</h3>
-                  
-                  <FormField
-                    control={form.control}
-                    name="exitDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Date de sortie</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} value={field.value || ""} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="exitQuantity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Quantité sortie</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min="0"
-                            {...field}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              field.onChange(value === '' ? null : parseInt(value) || null);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="exitUnitPriceHt"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Prix unitaire sortie HT (€)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            {...field}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              field.onChange(value === '' ? null : parseFloat(value) || null);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="exitAmount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Montant sortie (€)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            {...field}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              field.onChange(value === '' ? null : parseFloat(value) || null);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              )}
             </div>
 
-            {/* Commentaires */}
-            <FormField
-              control={form.control}
-              name="comments"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Commentaires</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Commentaires sur le produit..."
-                      className="min-h-[100px]"
-                      {...field}
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Boutons */}
-            <div className="flex justify-end gap-2">
+            {/* Boutons d'action */}
+            <div className="flex justify-end gap-4 pt-6 border-t">
               <Button type="button" variant="outline" onClick={handleClose}>
                 Annuler
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Enregistrement...' : product ? 'Modifier' : 'Ajouter'}
+                {isSubmitting ? 'Enregistrement...' : (product ? 'Modifier' : 'Ajouter')}
               </Button>
             </div>
           </form>

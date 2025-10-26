@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Search, Plus, Edit, Trash2, Printer, ArrowUpDown, ArrowUp, ArrowDown, GripVertical, Filter, X, Settings } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Printer, ArrowUpDown, ArrowUp, ArrowDown, GripVertical, Filter, X, Settings, QrCode } from 'lucide-react';
 import { Product } from '@/types/stock';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -122,12 +122,7 @@ export const ProductsTable = ({
   });
   const navigate = useNavigate();
   
-  const { preferences, reorderTableColumns, resetPreferences, ensureAmountColumn } = useUserPreferences();
-  
-  // S'assurer que la colonne amount est présente
-  useEffect(() => {
-    ensureAmountColumn();
-  }, [ensureAmountColumn]);
+  const { preferences, reorderTableColumns, resetPreferences } = useUserPreferences();
   
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -202,7 +197,6 @@ export const ProductsTable = ({
       (product.quantity && product.quantity.toString().includes(searchTerm)) ||
       (product.currentQuantity && product.currentQuantity.toString().includes(searchTerm)) ||
       (product.purchasePriceHt && product.purchasePriceHt.toString().includes(searchTerm)) ||
-      (product.amount && product.amount.toString().includes(searchTerm)) ||
       (product.currentValue && product.currentValue.toString().includes(searchTerm)) ||
       (product.usageDurationYears && product.usageDurationYears.toString().includes(searchTerm)) ||
       
@@ -428,15 +422,6 @@ export const ProductsTable = ({
         </div>
       )
     },
-    amount: { 
-      label: 'Montant total', 
-      className: 'w-[10%]',
-      render: (product: Product) => (
-        <div className="text-sm font-medium">
-          {product.amount ? formatCurrency(product.amount) : '-'}
-        </div>
-      )
-    },
     supplier: { 
       label: 'Fournisseur', 
       className: 'w-[10%]',
@@ -481,6 +466,14 @@ export const ProductsTable = ({
                 Gérer les catégories
               </Button>
             )}
+            <Button 
+              onClick={() => navigate('/qr-codes')} 
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <QrCode className="h-4 w-4" />
+              Imprimer QR Codes
+            </Button>
             <Button onClick={resetPreferences} variant="outline" size="sm">
               Réinitialiser l'ordre
             </Button>

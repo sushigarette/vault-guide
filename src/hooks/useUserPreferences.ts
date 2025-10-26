@@ -13,7 +13,6 @@ const defaultPreferences: UserPreferences = {
     'equipmentType',
     'currentQuantity',
     'purchasePriceHt',
-    'amount',
     'supplier',
     'status',
     'assignment'
@@ -40,13 +39,20 @@ export const useUserPreferences = () => {
         const parsed = JSON.parse(saved);
         const tableColumns = parsed.tableColumns || defaultPreferences.tableColumns;
         
-        // S'assurer que la colonne 'amount' est présente
-        if (!tableColumns.includes('amount')) {
-          tableColumns.splice(6, 0, 'amount'); // Insérer après 'purchasePriceHt'
-        }
+        // Nettoyer les colonnes obsolètes
+        const cleanedColumns = tableColumns.filter(col => 
+          col !== 'amount' && 
+          col !== 'currentValue' && 
+          col !== 'parcNumber' &&
+          col !== 'usageDurationYears' &&
+          col !== 'exitDate' &&
+          col !== 'exitQuantity' &&
+          col !== 'exitUnitPriceHt' &&
+          col !== 'exitAmount'
+        );
         
         setPreferences({
-          tableColumns,
+          tableColumns: cleanedColumns,
           dashboardCards: parsed.dashboardCards || defaultPreferences.dashboardCards
         });
       }
@@ -84,21 +90,11 @@ export const useUserPreferences = () => {
     localStorage.removeItem('userPreferences');
   };
 
-  // Fonction pour ajouter la colonne amount si elle n'existe pas
-  const ensureAmountColumn = () => {
-    if (!preferences.tableColumns.includes('amount')) {
-      const newColumns = [...preferences.tableColumns];
-      newColumns.splice(6, 0, 'amount'); // Insérer après 'purchasePriceHt'
-      setPreferences(prev => ({ ...prev, tableColumns: newColumns }));
-    }
-  };
-
   return {
     preferences,
     isLoaded,
     reorderTableColumns,
     reorderDashboardCards,
-    resetPreferences,
-    ensureAmountColumn
+    resetPreferences
   };
 };
