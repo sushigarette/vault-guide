@@ -47,7 +47,7 @@ export const ProductDetail = () => {
 
   useEffect(() => {
     const loadProduct = async () => {
-      if (id) {
+      if (id && loadProductById) {
         setIsLoading(true);
         setNotFound(false);
         
@@ -69,7 +69,7 @@ export const ProductDetail = () => {
     };
 
     loadProduct();
-  }, [id]);
+  }, [id, loadProductById, modifications]);
 
   // Charger les modifications quand le produit change
   useEffect(() => {
