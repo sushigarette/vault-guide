@@ -57,9 +57,6 @@ export const ProductDetail = () => {
         if (loadedProduct) {
           setProduct(loadedProduct);
           setNotFound(false);
-          // Récupérer les modifications pour ce produit
-          const productMods = modifications.filter(m => m.productId === id);
-          setProductModifications(productMods);
         } else {
           setNotFound(true);
         }
@@ -69,14 +66,17 @@ export const ProductDetail = () => {
     };
 
     loadProduct();
-  }, [id, loadProductById, modifications]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
-  // Charger les modifications quand le produit change
+  // Charger les modifications quand le produit est chargé
   useEffect(() => {
-    if (id) {
-      loadModifications(id);
+    if (product && id) {
+      // Récupérer les modifications pour ce produit
+      const productMods = modifications.filter(m => m.productId === id);
+      setProductModifications(productMods);
     }
-  }, [id]); // Retirer loadModifications des dépendances pour éviter la boucle
+  }, [product, modifications, id]);
 
   // Générer les codes visuels quand le produit change
   useEffect(() => {
