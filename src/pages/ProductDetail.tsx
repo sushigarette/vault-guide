@@ -14,7 +14,7 @@ import {
   Edit, 
   Printer,
   Calendar,
-  DollarSign,
+  Euro,
   AlertTriangle,
   CheckCircle,
   XCircle,
@@ -401,7 +401,7 @@ export const ProductDetail = () => {
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">PRIX ACHAT HT (€)</label>
                       <p className="text-lg flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
+                        <Euro className="h-4 w-4" />
                         {product.purchasePriceHt ? 
                           new Intl.NumberFormat('fr-FR', {
                             style: 'currency',
