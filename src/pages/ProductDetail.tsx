@@ -296,23 +296,25 @@ export const ProductDetail = () => {
             Retour à la liste
           </Button>
           
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">{product.brand} {product.model}</h1>
-              <p className="text-muted-foreground text-lg">N° Série: {product.serialNumber}</p>
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl md:text-3xl font-bold mb-2">{product.brand} {product.model}</h1>
+              <p className="text-muted-foreground text-base md:text-lg">N° Série: {product.serialNumber}</p>
             </div>
-            <div className="flex gap-2">
-              <Button onClick={handleEdit} variant="outline">
+            <div className="flex flex-wrap gap-2 w-full md:w-auto">
+              <Button onClick={handleEdit} variant="outline" className="flex-1 md:flex-none">
                 <Edit className="h-4 w-4 mr-2" />
                 Modifier
               </Button>
-              <Button onClick={handleShowBarcodes} variant="outline">
+              <Button onClick={handleShowBarcodes} variant="outline" className="flex-1 md:flex-none">
                 <QrCode className="h-4 w-4 mr-2" />
-                Voir codes
+                <span className="md:hidden">Codes</span>
+                <span className="hidden md:inline">Voir codes</span>
               </Button>
-              <Button onClick={handlePrint} className="bg-gradient-primary">
+              <Button onClick={handlePrint} className="bg-gradient-primary flex-1 md:flex-none">
                 <Printer className="h-4 w-4 mr-2" />
-                Imprimer codes
+                <span className="md:hidden">Imprimer</span>
+                <span className="hidden md:inline">Imprimer codes</span>
               </Button>
             </div>
           </div>
