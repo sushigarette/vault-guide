@@ -21,6 +21,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Composant pour les en-têtes de colonnes draggables
 const DraggableTableHead = ({ 
@@ -121,6 +122,7 @@ export const ProductsTable = ({
     brand: ''
   });
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   const { preferences, reorderTableColumns, resetPreferences } = useUserPreferences();
   
@@ -451,36 +453,54 @@ export const ProductsTable = ({
             <Search className="h-5 w-5" />
             Produits ({filteredProducts.length})
           </CardTitle>
-          <div className="flex gap-2">
-            <Button onClick={onImportProducts} variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              Importer
-            </Button>
-            {onManageCategories && (
-              <Button 
-                onClick={onManageCategories} 
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Settings className="h-4 w-4" />
-                Gérer les catégories
-              </Button>
+          <div className={`flex gap-2 ${isMobile ? 'flex-wrap' : ''}`}>
+            {!isMobile && (
+              <>
+                <Button onClick={onImportProducts} variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Importer
+                </Button>
+                {onManageCategories && (
+                  <Button 
+                    onClick={onManageCategories} 
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Gérer les catégories
+                  </Button>
+                )}
+                <Button 
+                  onClick={() => navigate('/qr-codes')} 
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <QrCode className="h-4 w-4" />
+                  Imprimer QR Codes
+                </Button>
+                <Button onClick={resetPreferences} variant="outline" size="sm">
+                  Réinitialiser l'ordre
+                </Button>
+              </>
             )}
-            <Button 
-              onClick={() => navigate('/qr-codes')} 
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <QrCode className="h-4 w-4" />
-              Imprimer QR Codes
-            </Button>
-            <Button onClick={resetPreferences} variant="outline" size="sm">
-              Réinitialiser l'ordre
-            </Button>
             <Button onClick={onAddProduct} className="bg-gradient-primary">
               <Plus className="h-4 w-4 mr-2" />
-              Ajouter un produit
+              {isMobile ? 'Ajouter' : 'Ajouter un produit'}
             </Button>
+            {isMobile && (
+              <>
+                <Button onClick={onImportProducts} variant="outline" size="sm">
+                  <Plus className="h-4 w-4" />
+                </Button>
+                <Button 
+                  onClick={() => navigate('/qr-codes')} 
+                  variant="outline"
+                  size="sm"
+                >
+                  <QrCode className="h-4 w-4" />
+                </Button>
+              </>
+            )}
           </div>
         </div>
         <div className="space-y-4">
@@ -607,80 +627,186 @@ export const ProductsTable = ({
         </div>
       </CardHeader>
       <CardContent>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <Table className="w-full table-fixed">
-              <TableHeader>
-                <TableRow>
-                  <SortableContext items={preferences.tableColumns} strategy={verticalListSortingStrategy}>
-                    {preferences.tableColumns.map((columnId) => (
-                      <DraggableTableHead
-                        key={columnId}
-                        columnId={columnId}
-                        onSort={handleSort}
-                        sortField={sortField}
-                        sortDirection={sortDirection}
-                      >
-                        {columnConfig[columnId as keyof typeof columnConfig]?.label || columnId}
-                      </DraggableTableHead>
-                    ))}
-                  </SortableContext>
-                  <TableHead className="w-[5%]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-              {sortedProducts.map((product) => (
-                <TableRow 
-                  key={product.id} 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => navigate(`/product/${product.id}`)}
-                >
-                  {preferences.tableColumns.map((columnId) => {
-                    const config = columnConfig[columnId as keyof typeof columnConfig];
-                    return (
-                      <TableCell key={columnId} className={config?.className || ''}>
-                        {config?.render(product) || '-'}
-                      </TableCell>
-                    );
-                  })}
-                  <TableCell className="w-[5%]" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex gap-1">
+        {/* Vue mobile : Cartes */}
+        {isMobile ? (
+          <div className="space-y-3">
+            {sortedProducts.map((product) => (
+              <Card 
+                key={product.id}
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => navigate(`/product/${product.id}`)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      {/* Informations principales */}
+                      <div className="mb-2">
+                        <h3 className="font-semibold text-base mb-1 truncate">
+                          {product.brand} {product.model}
+                        </h3>
+                        <p className="text-sm text-muted-foreground font-mono truncate">
+                          N°: {product.serialNumber || 'N/A'}
+                        </p>
+                      </div>
+
+                      {/* Badges et informations secondaires */}
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {product.equipmentType && (
+                          <Badge variant="outline" className="text-xs">
+                            {product.equipmentType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </Badge>
+                        )}
+                        <Badge 
+                          variant={
+                            product.status === 'EN_STOCK' ? 'default' :
+                            product.status === 'EN_UTILISATION' ? 'secondary' :
+                            product.status === 'SAV' ? 'destructive' : 'outline'
+                          }
+                          className="text-xs"
+                        >
+                          {product.status?.replace('_', ' ') || 'N/A'}
+                        </Badge>
+                        {product.currentQuantity > 0 && (
+                          <Badge variant="outline" className="text-xs">
+                            Qté: {product.currentQuantity}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Informations supplémentaires */}
+                      <div className="space-y-1 text-xs text-muted-foreground">
+                        {product.supplier && (
+                          <div className="truncate">
+                            <span className="font-medium">Fournisseur:</span> {product.supplier}
+                          </div>
+                        )}
+                        {product.assignment && (
+                          <div className="truncate">
+                            <span className="font-medium">Assigné à:</span> {product.assignment}
+                          </div>
+                        )}
+                        {product.purchasePriceHt && (
+                          <div>
+                            <span className="font-medium">Prix HT:</span> {formatCurrency(product.purchasePriceHt)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div 
+                      className="flex flex-col gap-2 flex-shrink-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => onEditProduct(product)}
-                        className="h-8 w-8 p-0"
+                        className="h-9 w-9 p-0"
                       >
-                        <Edit className="h-3 w-3" />
+                        <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => onDeleteProduct(product.id)}
-                        className="h-8 w-8 p-0"
+                        className="h-9 w-9 p-0 text-destructive hover:text-destructive"
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                       {onPrintProduct && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => onPrintProduct(product)}
-                          className="h-8 w-8 p-0"
+                          className="h-9 w-9 p-0"
                         >
-                          <Printer className="h-3 w-3" />
+                          <Printer className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              </TableBody>
-          </Table>
-        </DndContext>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          /* Vue desktop : Tableau */
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <Table className="w-full table-fixed">
+                <TableHeader>
+                  <TableRow>
+                    <SortableContext items={preferences.tableColumns} strategy={verticalListSortingStrategy}>
+                      {preferences.tableColumns.map((columnId) => (
+                        <DraggableTableHead
+                          key={columnId}
+                          columnId={columnId}
+                          onSort={handleSort}
+                          sortField={sortField}
+                          sortDirection={sortDirection}
+                        >
+                          {columnConfig[columnId as keyof typeof columnConfig]?.label || columnId}
+                        </DraggableTableHead>
+                      ))}
+                    </SortableContext>
+                    <TableHead className="w-[5%]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                {sortedProducts.map((product) => (
+                  <TableRow 
+                    key={product.id} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => navigate(`/product/${product.id}`)}
+                  >
+                    {preferences.tableColumns.map((columnId) => {
+                      const config = columnConfig[columnId as keyof typeof columnConfig];
+                      return (
+                        <TableCell key={columnId} className={config?.className || ''}>
+                          {config?.render(product) || '-'}
+                        </TableCell>
+                      );
+                    })}
+                    <TableCell className="w-[5%]" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onEditProduct(product)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onDeleteProduct(product.id)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                        {onPrintProduct && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onPrintProduct(product)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Printer className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                </TableBody>
+            </Table>
+          </DndContext>
+        )}
 
         {sortedProducts.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">

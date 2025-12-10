@@ -18,7 +18,13 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     sourcemap: false, // Désactiver les source maps en production
+    rollupOptions: {
+      input: {
+        main: './index.html',
+      },
+    },
   },
+  publicDir: 'public',
   esbuild: {
     // Réduire les avertissements de console
     logOverride: {
