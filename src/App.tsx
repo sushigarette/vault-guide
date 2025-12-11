@@ -21,12 +21,6 @@ const App = () => {
     localStorage.setItem('theme', 'light');
   }, []);
 
-  // Obtenir le base path depuis Vite
-  const basePath = import.meta.env.BASE_URL || '/';
-  // Normaliser le base path pour React Router (SANS trailing slash sauf si c'est "/")
-  // React Router basename ne doit PAS avoir de trailing slash
-  const normalizedBasePath = basePath === '/' ? '/' : basePath.replace(/\/$/, '');
-
   return (
   <div style={{ backgroundColor: 'white', minHeight: '100vh' }}>
     <QueryClientProvider client={queryClient}>
@@ -34,7 +28,6 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter
-          basename={normalizedBasePath}
           future={{
             v7_startTransition: true,
             v7_relativeSplatPath: true

@@ -1,18 +1,10 @@
 const CACHE_NAME = 'mhstock-v1';
-// Déterminer le base path depuis l'URL du service worker
-const getBasePath = () => {
-  const swUrl = self.location.pathname;
-  // sw.js est à la racine du base path, donc on enlève 'sw.js'
-  return swUrl.replace('/sw.js', '');
-};
-
-const basePath = getBasePath();
 const urlsToCache = [
-  basePath + '/',
-  basePath + '/index.html',
-  basePath + '/favicon.svg',
-  basePath + '/favicon.ico',
-  basePath + '/manifest.json'
+  '/',
+  '/index.html',
+  '/favicon.svg',
+  '/favicon.ico',
+  '/manifest.json'
 ];
 
 // Installation du service worker
@@ -71,7 +63,7 @@ self.addEventListener('fetch', (event) => {
       .catch(() => {
         // En cas d'erreur, retourner une page hors ligne si c'est une navigation
         if (event.request.mode === 'navigate') {
-          return caches.match(basePath + '/index.html');
+          return caches.match('/index.html');
         }
       })
   );

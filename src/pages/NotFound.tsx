@@ -1,26 +1,11 @@
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
 const NotFound = () => {
   const location = useLocation();
-  const navigate = useNavigate();
 
   useEffect(() => {
-    // Ne logger que si ce n'est pas juste le basename ou la racine
-    const basePath = import.meta.env.BASE_URL || '/';
-    const normalizedBasePath = basePath === '/' ? '/' : basePath.replace(/\/$/, '');
-    const currentPath = location.pathname;
-    
-    // Si le pathname est exactement le base path (avec ou sans trailing slash), ne pas logger
-    // car React Router devrait mapper cela à la route "/"
-    const isBasePath = currentPath === basePath || 
-                      currentPath === normalizedBasePath || 
-                      currentPath === basePath + '/' ||
-                      currentPath === normalizedBasePath + '/';
-    
-    if (!isBasePath && currentPath !== '/') {
-      console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-    }
+    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
 
   return (
