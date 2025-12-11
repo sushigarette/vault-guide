@@ -23,7 +23,8 @@ const App = () => {
 
   // Obtenir le base path depuis Vite
   const basePath = import.meta.env.BASE_URL || '/';
-  // Normaliser le base path (enlever le trailing slash sauf si c'est juste "/")
+  // Normaliser le base path pour React Router (SANS trailing slash sauf si c'est "/")
+  // React Router basename ne doit PAS avoir de trailing slash
   const normalizedBasePath = basePath === '/' ? '/' : basePath.replace(/\/$/, '');
 
   return (
