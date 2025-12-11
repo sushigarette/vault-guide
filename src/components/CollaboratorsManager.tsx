@@ -491,12 +491,6 @@ export const CollaboratorsManager: React.FC<CollaboratorsManagerProps> = ({
                               {product.status}
                             </Badge>
                           </div>
-                          {product.parcNumber && (
-                            <div className="flex justify-between">
-                              <span>Réf:</span>
-                              <span>{product.parcNumber}</span>
-                            </div>
-                          )}
                         </div>
                       </CardContent>
                     </Card>

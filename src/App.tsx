@@ -13,9 +13,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Initialiser le thème au chargement de l'app
   useEffect(() => {
-    // Forcer le thème clair pour éviter le fond jaune
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add('light');
     localStorage.setItem('theme', 'light');
@@ -39,7 +37,6 @@ const App = () => {
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/collaborator/:id" element={<CollaboratorDetail />} />
             <Route path="/qr-codes" element={<QRCodePrintPage />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

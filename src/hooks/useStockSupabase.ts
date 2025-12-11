@@ -19,13 +19,10 @@ export const useStockSupabase = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [productsPerPage] = useState(3000);
 
-  // Charger les produits
   const loadProducts = async (page = 0, limit = 3000) => {
-    console.log(`Chargement des produits: page ${page}, limite ${limit}`);
     try {
       setLoading(true);
       
-      // D'abord, compter le total
       const { count, error: countError } = await supabase
         .from('products')
         .select('*', { count: 'exact', head: true });
@@ -35,12 +32,9 @@ export const useStockSupabase = () => {
       setTotalProducts(count || 0);
       setCurrentPage(page);
       
-      // Charger tous les produits en plusieurs requêtes de 1000
       const allProducts: any[] = [];
       const batchSize = 1000;
       const totalBatches = Math.ceil((count || 0) / batchSize);
-      
-      console.log(`Chargement de ${count || 0} produits en ${totalBatches} lots de ${batchSize}`);
       
       for (let batch = 0; batch < totalBatches; batch++) {
         const from = batch * batchSize;
@@ -56,11 +50,8 @@ export const useStockSupabase = () => {
         
         if (data) {
           allProducts.push(...data);
-          console.log(`Lot ${batch + 1}/${totalBatches}: ${data.length} produits chargés`);
         }
       }
-      
-      console.log(`Total produits chargés: ${allProducts.length} sur ${count || 0}`);
 
       const formattedProducts: Product[] = allProducts.map(product => ({
         id: product.id,
@@ -231,7 +222,6 @@ export const useStockSupabase = () => {
       if (error) {
         // Si la table n'existe pas encore, ne pas afficher d'erreur
         if (error.message.includes('relation "product_modifications" does not exist')) {
-          console.log('Table product_modifications n\'existe pas encore, ignoré');
           setModifications([]);
           return;
         }
@@ -284,7 +274,6 @@ export const useStockSupabase = () => {
       if (error) {
         // Si la table n'existe pas encore, ne pas afficher d'erreur
         if (error.message.includes('relation "product_modifications" does not exist')) {
-          console.log('Table product_modifications n\'existe pas encore, modification non enregistrée');
           return;
         }
         throw error;
@@ -480,16 +469,6 @@ export const useStockSupabase = () => {
             continue;
           }
           
-          // Debug pour les champs problématiques
-          if (field === 'equipmentType' || field === 'status') {
-            console.log(`Debug ${field}:`, {
-              oldValue,
-              newValue,
-              oldType: typeof oldValue,
-              newType: typeof newValue
-            });
-          }
-          
           // Normaliser les valeurs pour la comparaison
           const normalizedOldValue = oldValue === null || oldValue === undefined || oldValue === '' ? null : String(oldValue);
           const normalizedNewValue = newValue === null || newValue === undefined || newValue === '' ? null : String(newValue);
@@ -514,13 +493,6 @@ export const useStockSupabase = () => {
           if (normalizedOldValue === '' && normalizedNewValue === '') {
             continue;
           }
-          
-          // Enregistrer la modification seulement si elle est significative
-          console.log(`Enregistrement modification ${field}:`, {
-            displayName,
-            oldValue: normalizedOldValue,
-            newValue: normalizedNewValue
-          });
           
           await logModification(
             id,
@@ -873,7 +845,6 @@ export const useStockSupabase = () => {
   // Charger un produit spécifique par ID
   const loadProductById = async (productId: string): Promise<Product | null> => {
     try {
-      console.log(`Chargement du produit: ${productId}`);
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -931,17 +902,7 @@ export const useStockSupabase = () => {
         });
 
         if (error) {
-          console.warn('⚠️ Impossible de mettre à jour la contrainte automatiquement:', error);
-          console.log('📝 Veuillez exécuter le script SQL suivant dans Supabase SQL Editor :');
-          console.log('');
-          console.log('-- Script à exécuter dans Supabase SQL Editor');
-          console.log('ALTER TABLE products DROP CONSTRAINT IF EXISTS check_equipment_type;');
-          console.log(`ALTER TABLE products ADD CONSTRAINT check_equipment_type CHECK (equipment_type IN (${typeNames}));`);
-          console.log('');
-          console.log('🔧 Ou utilisez le script fix-mobile-constraint.sql qui est déjà prêt !');
-          console.log('');
-        } else {
-          console.log('✅ Contrainte mise à jour automatiquement');
+          console.warn('Impossible de mettre à jour la contrainte automatiquement:', error);
         }
       }
     } catch (error) {
@@ -1044,9 +1005,6 @@ export const useStockSupabase = () => {
   // Synchroniser les fournisseurs des produits avec la table suppliers
   const syncSuppliersFromProducts = async () => {
     try {
-      console.log('Synchronisation des fournisseurs depuis les produits...');
-      
-      // Récupérer tous les fournisseurs uniques des produits
       const uniqueSuppliers = Array.from(
         new Set(
           products
@@ -1059,9 +1017,6 @@ export const useStockSupabase = () => {
         )
       );
 
-      console.log(`Fournisseurs trouvés dans les produits: ${uniqueSuppliers.length}`, uniqueSuppliers);
-
-      // Récupérer les fournisseurs existants
       const { data: existingSuppliers, error: fetchError } = await supabase
         .from('suppliers')
         .select('name');
@@ -1069,11 +1024,7 @@ export const useStockSupabase = () => {
       if (fetchError) throw fetchError;
 
       const existingNames = existingSuppliers?.map(s => s.name) || [];
-      console.log('Fournisseurs existants:', existingNames);
-
-      // Ajouter les nouveaux fournisseurs
       const newSuppliers = uniqueSuppliers.filter(name => !existingNames.includes(name));
-      console.log(`Nouveaux fournisseurs à ajouter: ${newSuppliers.length}`, newSuppliers);
 
       if (newSuppliers.length > 0) {
         const suppliersToInsert = newSuppliers.map(name => ({
@@ -1089,13 +1040,8 @@ export const useStockSupabase = () => {
           .insert(suppliersToInsert);
 
         if (insertError) throw insertError;
-
-        console.log(`${newSuppliers.length} nouveaux fournisseurs ajoutés à la base de données`);
         
-        // Recharger les fournisseurs
         await loadSuppliers();
-      } else {
-        console.log('Aucun nouveau fournisseur à ajouter');
       }
 
     } catch (error) {

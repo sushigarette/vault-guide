@@ -113,15 +113,12 @@ export const QRCodePrintPage = () => {
   // Générer les QR codes pour tous les produits visibles
   const generateQRCodes = async () => {
     setIsGeneratingQRCodes(true);
-    console.log('🔄 Génération des QR codes pour', filteredProducts.length, 'produits');
     
-    // Générer les QR codes pour tous les produits filtrés
     for (const product of filteredProducts) {
       const canvas = document.getElementById(`qr-${product.id}`) as HTMLCanvasElement;
       if (canvas) {
         try {
           const qrUrl = getAppUrl(`/product/${product.id}`);
-          console.log('📱 Génération QR code pour:', product.brand, product.model, 'URL:', qrUrl);
           
           await QRCode.toCanvas(canvas, qrUrl, {
             width: 120,
@@ -131,18 +128,13 @@ export const QRCodePrintPage = () => {
               light: '#FFFFFF'
             }
           });
-          
-          console.log('✅ QR code généré pour:', product.id);
         } catch (error) {
-          console.error(`❌ Erreur génération QR code pour ${product.id}:`, error);
+          console.error(`Erreur génération QR code pour ${product.id}:`, error);
         }
-      } else {
-        console.warn('⚠️ Canvas non trouvé pour le produit:', product.id);
       }
     }
     
     setIsGeneratingQRCodes(false);
-    console.log('✅ Génération des QR codes terminée');
   };
 
   // Imprimer les QR codes sélectionnés

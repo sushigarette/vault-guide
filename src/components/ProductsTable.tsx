@@ -139,17 +139,14 @@ export const ProductsTable = ({
       .filter(product => product && product.id) // S'assurer que le produit existe
       .map(product => product[field])
       .filter((value): value is string => {
-        return value != null && 
+        return typeof value === 'string' && 
+               value != null && 
                value !== '' && 
                value.trim() !== '' && 
-               typeof value === 'string' &&
                value.length > 0;
       })
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort();
-    
-    // Debug: afficher les valeurs disponibles pour chaque champ
-    console.log(`📋 Valeurs uniques pour ${field}:`, values);
     
     return values;
   };
@@ -160,10 +157,10 @@ export const ProductsTable = ({
       .filter(product => product && product.id) // S'assurer que le produit existe
       .map(product => product.assignment)
       .filter((value): value is string => {
-        return value != null && 
+        return typeof value === 'string' && 
+               value != null && 
                value !== '' && 
                value.trim() !== '' && 
-               typeof value === 'string' &&
                value.length > 0;
       })
       .filter((value, index, array) => array.indexOf(value) === index)
@@ -187,24 +184,14 @@ export const ProductsTable = ({
       (product.model && product.model.toLowerCase().includes(searchTermLower)) ||
       (product.assignment && product.assignment.toLowerCase().includes(searchTermLower)) ||
       (product.supplier && product.supplier.toLowerCase().includes(searchTermLower)) ||
-      
-      // Champs additionnels
-      (product.parcNumber && product.parcNumber.toLowerCase().includes(searchTermLower)) ||
       (product.equipmentType && product.equipmentType.toLowerCase().includes(searchTermLower)) ||
       (product.status && product.status.toLowerCase().includes(searchTermLower)) ||
       (product.invoiceNumber && product.invoiceNumber.toLowerCase().includes(searchTermLower)) ||
       (product.comments && product.comments.toLowerCase().includes(searchTermLower)) ||
-      
-      // Champs numériques convertis en texte
       (product.quantity && product.quantity.toString().includes(searchTerm)) ||
       (product.currentQuantity && product.currentQuantity.toString().includes(searchTerm)) ||
       (product.purchasePriceHt && product.purchasePriceHt.toString().includes(searchTerm)) ||
-      (product.currentValue && product.currentValue.toString().includes(searchTerm)) ||
-      (product.usageDurationYears && product.usageDurationYears.toString().includes(searchTerm)) ||
-      
-      // Champs de dates
-      (product.entryDate && product.entryDate.includes(searchTerm)) ||
-      (product.exitDate && product.exitDate.includes(searchTerm))
+      (product.entryDate && product.entryDate.includes(searchTerm))
     );
 
     // Filtres spécifiques
@@ -214,40 +201,14 @@ export const ProductsTable = ({
     const matchesAssignment = !filters.assignment || product.assignment === filters.assignment;
     const matchesBrand = !filters.brand || product.brand === filters.brand;
 
-    // Debug: afficher les filtres actifs
-    if (Object.values(filters).some(value => value !== '')) {
-      console.log('🔍 Filtres actifs:', filters);
-      console.log('📦 Produit:', product.brand, product.model, {
-        equipmentType: product.equipmentType,
-        status: product.status,
-        supplier: product.supplier,
-        assignment: product.assignment,
-        brand: product.brand
-      });
-      console.log('✅ Correspondances:', {
-        matchesEquipmentType,
-        matchesStatus,
-        matchesSupplier,
-        matchesAssignment,
-        matchesBrand
-      });
-    }
-
     return matchesSearch && matchesEquipmentType && matchesStatus && matchesSupplier && matchesAssignment && matchesBrand;
   });
 
-  // Fonction de tri
   const handleSort = (field: string) => {
-    console.log('🔄 Tri demandé pour le champ:', field);
-    console.log('📊 Champ actuel:', sortField);
-    console.log('📈 Direction actuelle:', sortDirection);
-    
     if (sortField === field) {
       const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-      console.log('🔄 Changement de direction vers:', newDirection);
       setSortDirection(newDirection);
     } else {
-      console.log('🆕 Nouveau champ de tri:', field);
       setSortField(field);
       setSortDirection('asc');
     }
@@ -370,11 +331,6 @@ export const ProductsTable = ({
           <div className="font-mono text-xs truncate" title={product.serialNumber}>
             {product.serialNumber}
           </div>
-          {product.parcNumber && (
-            <div className="text-xs text-muted-foreground truncate" title={`Réf: ${product.parcNumber}`}>
-              Réf: {product.parcNumber}
-            </div>
-          )}
         </div>
       )
     },

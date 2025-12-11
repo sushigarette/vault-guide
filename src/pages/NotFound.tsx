@@ -4,10 +4,6 @@ import { useEffect } from "react";
 const NotFound = () => {
   const location = useLocation();
 
-  useEffect(() => {
-    // Ne pas logger en erreur, c'est normal pour les routes non trouvées
-    console.log("404: Route not found:", location.pathname);
-  }, [location.pathname]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">

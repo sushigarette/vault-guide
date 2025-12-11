@@ -133,26 +133,11 @@ export const ProductForm = ({ product, isOpen, onClose, onSubmit }: ProductFormP
           // Inclure seulement si la valeur a vraiment changé
           // Ne pas inclure les champs qui sont identiques
           if (normalizedOriginal !== normalizedNew) {
-            // Vérification spéciale pour les champs problématiques
-            if (key === 'equipmentType' || key === 'status') {
-              console.log(`Champ ${key} détecté comme modifié:`, {
-                original: originalValue,
-                new: value,
-                normalizedOriginal,
-                normalizedNew
-              });
-            }
             (changedData as any)[key] = value;
           }
         });
         
-        // Debug: afficher les changements détectés
-        console.log('Champs modifiés:', Object.keys(changedData));
-        console.log('Données de changement:', changedData);
-        
-        // Si aucun champ n'a été modifié, ne pas envoyer de données
         if (Object.keys(changedData).length === 0) {
-          console.log('Aucun changement détecté, fermeture du modal');
           onClose();
           return;
         }
