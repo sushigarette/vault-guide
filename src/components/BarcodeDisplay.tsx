@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { QrCode, Barcode, Copy, Download } from 'lucide-react';
 import { Product } from '@/types/stock';
 import { QRCodeInfo } from './QRCodeInfo';
+import { getAppUrl } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import JsBarcode from 'jsbarcode';
@@ -24,7 +25,7 @@ export const BarcodeDisplay = ({ product, onClose }: BarcodeDisplayProps) => {
   // Générer le QR code avec l'URL de la page produit
   useEffect(() => {
     if (qrCodeRef.current && product.id) {
-      const qrUrl = `${window.location.origin}/product/${product.id}`;
+      const qrUrl = getAppUrl(`/product/${product.id}`);
       QRCode.toCanvas(qrCodeRef.current, qrUrl, {
         width: 200,
         margin: 2,

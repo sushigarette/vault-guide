@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Product, StockMovement, StockStats, User, ImportResult, ProductModification, EquipmentType, Supplier } from '@/types/stock';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from './useAuth';
+import { getAppUrl } from '@/lib/utils';
 import * as XLSX from 'xlsx';
 
 export const useStockSupabase = () => {
@@ -78,7 +79,7 @@ export const useStockSupabase = () => {
         quantity: product.quantity,
         currentQuantity: product.current_quantity,
         comments: product.comments,
-        qrCode: `${window.location.origin}/product/${product.id}`,
+        qrCode: getAppUrl(`/product/${product.id}`),
         createdAt: new Date(product.created_at),
         updatedAt: new Date(product.updated_at),
       }));
@@ -368,7 +369,7 @@ export const useStockSupabase = () => {
         quantity: data.quantity,
         currentQuantity: data.current_quantity,
         comments: data.comments,
-        qrCode: `${window.location.origin}/product/${data.id}`,
+        qrCode: getAppUrl(`/product/${data.id}`),
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at),
       };
@@ -439,7 +440,7 @@ export const useStockSupabase = () => {
         quantity: data.quantity,
         currentQuantity: data.current_quantity,
         comments: data.comments,
-        qrCode: `${window.location.origin}/product/${data.id}`,
+        qrCode: getAppUrl(`/product/${data.id}`),
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at),
       };
@@ -899,7 +900,7 @@ export const useStockSupabase = () => {
           quantity: data.quantity,
           currentQuantity: data.current_quantity,
           comments: data.comments,
-          qrCode: `${window.location.origin}/product/${data.id}`,
+          qrCode: getAppUrl(`/product/${data.id}`),
           createdAt: new Date(data.created_at),
           updatedAt: new Date(data.updated_at),
         };

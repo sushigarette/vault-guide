@@ -29,6 +29,7 @@ import { Product, StockMovement, ProductModification } from '@/types/stock';
 import { useStockSupabase as useStock } from '@/hooks/useStockSupabase';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthForm } from '@/components/AuthForm';
+import { getAppUrl } from '@/lib/utils';
 import QRCode from 'qrcode';
 import JsBarcode from 'jsbarcode';
 
@@ -48,7 +49,7 @@ export const ProductDetail = () => {
   // Fonctions de génération de codes
   const generateQRCode = async () => {
     if (product && product.id) {
-      const qrUrl = `${window.location.origin}/product/${product.id}`;
+      const qrUrl = getAppUrl(`/product/${product.id}`);
       const canvas = document.getElementById(`qr-${product.id}`) as HTMLCanvasElement;
       if (canvas) {
         try {

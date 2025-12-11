@@ -11,6 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, Edit, Trash2, Users, Package, X, Pencil, Printer, Link, QrCode } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Product } from '@/types/stock';
+import { getAppUrl } from '@/lib/utils';
 import QRCode from 'qrcode';
 
 interface CollaboratorsManagerProps {
@@ -170,7 +171,7 @@ export const CollaboratorsManager: React.FC<CollaboratorsManagerProps> = ({
         const canvasId = `qr-collaborator-${collaborator.id}`;
         const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
         if (canvas) {
-          const qrUrl = `${window.location.origin}/collaborator/${collaborator.id}`;
+          const qrUrl = getAppUrl(`/collaborator/${collaborator.id}`);
           try {
             await QRCode.toCanvas(canvas, qrUrl, {
               width: 120,

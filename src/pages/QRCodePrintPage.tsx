@@ -20,6 +20,7 @@ import { Product } from '@/types/stock';
 import { useStockSupabase } from '@/hooks/useStockSupabase';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthForm } from '@/components/AuthForm';
+import { getAppUrl } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import QRCode from 'qrcode';
 
@@ -119,7 +120,7 @@ export const QRCodePrintPage = () => {
       const canvas = document.getElementById(`qr-${product.id}`) as HTMLCanvasElement;
       if (canvas) {
         try {
-          const qrUrl = `${window.location.origin}/product/${product.id}`;
+          const qrUrl = getAppUrl(`/product/${product.id}`);
           console.log('📱 Génération QR code pour:', product.brand, product.model, 'URL:', qrUrl);
           
           await QRCode.toCanvas(canvas, qrUrl, {
@@ -161,7 +162,7 @@ export const QRCodePrintPage = () => {
         const canvas = document.getElementById(`qr-${product.id}`) as HTMLCanvasElement;
         if (canvas) {
           try {
-            const qrUrl = `${window.location.origin}/product/${product.id}`;
+            const qrUrl = getAppUrl(`/product/${product.id}`);
             await QRCode.toCanvas(canvas, qrUrl, {
               width: 200,
               margin: 2,
@@ -350,7 +351,7 @@ export const QRCodePrintPage = () => {
           const canvas = printWindow.document.getElementById(`qr-${product.id}`) as HTMLCanvasElement;
           if (canvas) {
             try {
-              const qrUrl = `${window.location.origin}/product/${product.id}`;
+              const qrUrl = getAppUrl(`/product/${product.id}`);
               await QRCode.toCanvas(canvas, qrUrl, {
                 width: 100,
                 margin: 1,

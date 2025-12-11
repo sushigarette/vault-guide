@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { QrCode, Barcode, Printer, Download, Copy, Settings } from 'lucide-react';
 import { Product } from '@/types/stock';
+import { getAppUrl } from '@/lib/utils';
 import JsBarcode from 'jsbarcode';
 import QRCode from 'qrcode';
 
@@ -26,7 +27,7 @@ const barcodeFormats = [
 export const BarcodePrinter = ({ product, onClose }: BarcodePrinterProps) => {
   const [barcodeFormat, setBarcodeFormat] = useState('CODE128');
   const [barcodeValue, setBarcodeValue] = useState(product.serialNumber);
-  const [qrValue, setQrValue] = useState(`${window.location.origin}/product/${product.id}`);
+  const [qrValue, setQrValue] = useState(getAppUrl(`/product/${product.id}`));
   const [showSettings, setShowSettings] = useState(false);
   const [printSettings, setPrintSettings] = useState({
     width: 2,
