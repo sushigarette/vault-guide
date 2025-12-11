@@ -75,8 +75,9 @@ curl -I https://mhcerts.infra.mhcomm.fr/mhcse/
 ## 📝 Notes importantes
 
 1. **Ordre des locations** : Les locations spécifiques (`/mhstock/assets/`) doivent être AVANT les locations générales (`/mhstock/`)
-2. **Alias vs Root** : Utilisez `alias` pour les sous-dossiers, `root` pour la racine
-3. **Fallback SPA** : Le `@mhstock_fallback` permet le routing React (toutes les routes pointent vers `index.html`)
+2. **Fichiers statiques à la racine** : Les fichiers `/sw.js`, `/manifest.json`, `/favicon.svg`, etc. sont interceptés AVANT la location `/` pour mhcerts, car mhstock les référence avec des chemins absolus
+3. **Alias vs Root** : Utilisez `alias` pour les sous-dossiers, `root` pour la racine
+4. **Fallback SPA** : Le `@mhstock_fallback` permet le routing React (toutes les routes pointent vers `index.html`)
 
 ## 🐛 Dépannage
 
