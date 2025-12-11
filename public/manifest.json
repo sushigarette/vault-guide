@@ -2,37 +2,37 @@
   "name": "MHStock - Gestion de Stock",
   "short_name": "MHStock",
   "description": "Système de gestion de stock MHComm",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "./favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "/favicon.ico",
+      "src": "./favicon.ico",
       "sizes": "48x48",
       "type": "image/x-icon"
     },
     {
-      "src": "/icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/apple-touch-icon.png",
+      "src": "./apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any maskable"
@@ -45,15 +45,15 @@
       "name": "Produits",
       "short_name": "Produits",
       "description": "Voir tous les produits",
-      "url": "/",
-      "icons": [{ "src": "/favicon.svg", "sizes": "96x96" }]
+      "url": "./",
+      "icons": [{ "src": "./favicon.svg", "sizes": "96x96" }]
     },
     {
       "name": "QR Codes",
       "short_name": "QR Codes",
       "description": "Imprimer les QR codes",
-      "url": "/qr-codes",
-      "icons": [{ "src": "/favicon.svg", "sizes": "96x96" }]
+      "url": "./qr-codes",
+      "icons": [{ "src": "./favicon.svg", "sizes": "96x96" }]
     }
   ]
 }
