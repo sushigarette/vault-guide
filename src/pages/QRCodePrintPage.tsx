@@ -185,14 +185,20 @@ export const QRCodePrintPage = () => {
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Étiquettes QR Codes - ${selectedProductsList.length} produits</title>
+          <title>Étiquettes</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
             @page {
               size: A4;
-              margin: 0;
+              margin: 0.5mm 0 0 0;
               padding: 0;
               transform: scale(1);
+            }
+            
+            @media print {
+              @page {
+                margin: 0.5mm 0 0 0;
+              }
             }
             
             body {
@@ -204,10 +210,10 @@ export const QRCodePrintPage = () => {
             
             .page {
               width: 210mm;
-              height: 297mm;
+              height: 296.5mm;
               display: grid;
-              grid-template-columns: repeat(2, 1fr);
-              grid-template-rows: repeat(8, 1fr);
+              grid-template-columns: 105mm 105mm;
+              grid-template-rows: repeat(8, 37mm);
               gap: 0;
               page-break-after: always;
               box-sizing: border-box;
@@ -216,12 +222,14 @@ export const QRCodePrintPage = () => {
             }
             
             .label {
-              width: 100%;
-              height: 100%;
+              width: 105mm;
+              height: 37mm;
               border: none;
               border-collapse: collapse;
               padding: 1mm;
               box-sizing: border-box;
+              page-break-inside: avoid;
+              overflow: hidden;
             }
             
             .label-info {
@@ -275,8 +283,6 @@ export const QRCodePrintPage = () => {
             
             @media print {
               * {
-                margin: 0 !important;
-                padding: 0 !important;
                 box-sizing: border-box !important;
               }
               
@@ -288,22 +294,27 @@ export const QRCodePrintPage = () => {
               }
               
               .page {
-                width: 100% !important;
-                height: 100% !important;
+                width: 210mm !important;
+                height: 296.5mm !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                display: grid !important;
+                grid-template-columns: 105mm 105mm !important;
+                grid-template-rows: repeat(8, 37mm) !important;
                 page-break-after: always;
               }
               
               .label {
-                width: 100% !important;
-                height: 100% !important;
+                width: 105mm !important;
+                height: 37mm !important;
                 margin: 0 !important;
                 padding: 1mm !important;
                 border: none !important;
                 border-collapse: collapse !important;
                 box-sizing: border-box !important;
                 display: table !important;
+                page-break-inside: avoid !important;
+                overflow: hidden !important;
               }
 
               .label-info {
@@ -335,7 +346,7 @@ export const QRCodePrintPage = () => {
             
             return `
               ${isNewPage ? `<div class="page">` : ''}
-                <table class="label" style="width: 100%; height: 100%; border: none; border-collapse: collapse; padding: 1mm;">
+                <table class="label" style="width: 105mm; height: 37mm; border: none; border-collapse: collapse; padding: 1mm; box-sizing: border-box;">
                   <tr>
                     <td class="label-info" style="width: 70%; text-align: center; vertical-align: middle; padding-right: 2mm;">
                       <div style="text-align: center; font-weight: bold; font-size: 10px; margin-bottom: 1mm; line-height: 1.1;">${product.brand || 'N/A'}</div>
