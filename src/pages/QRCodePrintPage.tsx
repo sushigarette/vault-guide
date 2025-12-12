@@ -219,21 +219,16 @@ export const QRCodePrintPage = () => {
               width: 100%;
               height: 100%;
               border: none;
-              display: flex;
-              flex-direction: row;
-              align-items: center;
-              justify-content: space-between;
+              border-collapse: collapse;
               padding: 1mm;
               box-sizing: border-box;
-              position: relative;
             }
             
             .label-info {
-              flex: 1;
+              width: 70%;
+              text-align: center;
+              vertical-align: middle;
               padding-right: 2mm;
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
             }
             
             .label-brand {
@@ -241,6 +236,7 @@ export const QRCodePrintPage = () => {
               font-size: 10px;
               margin-bottom: 1mm;
               line-height: 1.1;
+              text-align: center;
             }
             
             .label-model {
@@ -249,14 +245,15 @@ export const QRCodePrintPage = () => {
               margin-bottom: 1mm;
               word-break: break-word;
               line-height: 1.1;
+              text-align: center;
             }
             
             .label-serial {
               font-size: 8px;
               font-family: monospace;
               color: #333;
-              margin-bottom: 1mm;
               line-height: 1.1;
+              text-align: center;
             }
             
             
@@ -304,6 +301,27 @@ export const QRCodePrintPage = () => {
                 margin: 0 !important;
                 padding: 1mm !important;
                 border: none !important;
+                border-collapse: collapse !important;
+                box-sizing: border-box !important;
+                display: table !important;
+              }
+
+              .label-info {
+                text-align: center !important;
+                vertical-align: middle !important;
+                width: 70% !important;
+                padding-right: 2mm !important;
+              }
+
+              .label-brand, .label-model, .label-serial {
+                text-align: center !important;
+                display: block !important;
+              }
+
+              .qr-code {
+                text-align: center !important;
+                vertical-align: middle !important;
+                width: 30% !important;
               }
             }
           </style>
@@ -317,16 +335,18 @@ export const QRCodePrintPage = () => {
             
             return `
               ${isNewPage ? `<div class="page">` : ''}
-                <div class="label">
-                  <div class="label-info">
-                    <div class="label-brand">${product.brand || 'N/A'}</div>
-                    <div class="label-model">${product.model || 'N/A'}</div>
-                    <div class="label-serial">${product.serialNumber || 'N/A'}</div>
-                  </div>
-                  <div class="qr-code">
-                    <canvas id="qr-${product.id}" width="80" height="80"></canvas>
-                  </div>
-                </div>
+                <table class="label" style="width: 100%; height: 100%; border: none; border-collapse: collapse; padding: 1mm;">
+                  <tr>
+                    <td class="label-info" style="width: 70%; text-align: center; vertical-align: middle; padding-right: 2mm;">
+                      <div style="text-align: center; font-weight: bold; font-size: 10px; margin-bottom: 1mm; line-height: 1.1;">${product.brand || 'N/A'}</div>
+                      <div style="text-align: center; font-size: 8px; color: #666; margin-bottom: 1mm; word-break: break-word; line-height: 1.1;">${product.model || 'N/A'}</div>
+                      <div style="text-align: center; font-size: 8px; font-family: monospace; color: #333; line-height: 1.1;">${product.serialNumber || 'N/A'}</div>
+                    </td>
+                    <td class="qr-code" style="width: 30%; text-align: center; vertical-align: middle;">
+                      <canvas id="qr-${product.id}" width="80" height="80" style="max-width: 30mm; max-height: 30mm; width: auto; height: auto;"></canvas>
+                    </td>
+                  </tr>
+                </table>
               ${isEndOfPage ? `</div>` : ''}
             `;
           }).join('')}
