@@ -12,8 +12,8 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function getAppUrl(path: string): string {
   const baseUrl = window.location.origin;
-  const basePath = import.meta.env.BASE_URL || '/';
-  const cleanBasePath = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
+  // Utiliser le même basename que dans App.tsx (BrowserRouter basename="/mhstock")
+  const basePath = '/mhstock';
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${baseUrl}${cleanBasePath}${cleanPath}`;
+  return `${baseUrl}${basePath}${cleanPath}`;
 }
