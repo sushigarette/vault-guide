@@ -190,14 +190,15 @@ export const QRCodePrintPage = () => {
           <style>
             @page {
               size: A4;
-              margin: 0.5mm 0 0 0;
+              margin: 0;
               padding: 0;
               transform: scale(1);
             }
             
             @media print {
               @page {
-                margin: 0.5mm 0 0 0;
+                margin: 0;
+                size: A4;
               }
             }
             
@@ -210,10 +211,10 @@ export const QRCodePrintPage = () => {
             
             .page {
               width: 210mm;
-              height: 296.5mm;
+              height: 297mm;
               display: grid;
               grid-template-columns: 105mm 105mm;
-              grid-template-rows: repeat(8, 37mm);
+              grid-template-rows: repeat(8, 37.125mm);
               gap: 0;
               page-break-after: always;
               box-sizing: border-box;
@@ -223,13 +224,13 @@ export const QRCodePrintPage = () => {
             
             .label {
               width: 105mm;
-              height: 37mm;
+              height: 37.125mm;
               border: none;
-              border-collapse: collapse;
-              padding: 1mm;
               box-sizing: border-box;
               page-break-inside: avoid;
               overflow: hidden;
+              margin: 0;
+              padding: 0;
             }
             
             .label-info {
@@ -295,26 +296,39 @@ export const QRCodePrintPage = () => {
               
               .page {
                 width: 210mm !important;
-                height: 296.5mm !important;
+                height: 297mm !important;
+                max-height: 297mm !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 display: grid !important;
                 grid-template-columns: 105mm 105mm !important;
-                grid-template-rows: repeat(8, 37mm) !important;
+                grid-template-rows: repeat(8, 37.125mm) !important;
                 page-break-after: always;
+                page-break-inside: avoid;
               }
               
               .label {
                 width: 105mm !important;
-                height: 37mm !important;
+                height: 37.125mm !important;
+                max-width: 105mm !important;
+                max-height: 37.125mm !important;
                 margin: 0 !important;
-                padding: 1mm !important;
+                padding: 0 !important;
                 border: none !important;
-                border-collapse: collapse !important;
                 box-sizing: border-box !important;
-                display: table !important;
                 page-break-inside: avoid !important;
                 overflow: hidden !important;
+              }
+              
+              .label table {
+                width: 100% !important;
+                height: 100% !important;
+                max-width: 100% !important;
+                max-height: 100% !important;
+                border-collapse: collapse !important;
+                padding: 1mm !important;
+                box-sizing: border-box !important;
+                margin: 0 !important;
               }
 
               .label-info {
@@ -338,29 +352,54 @@ export const QRCodePrintPage = () => {
           </style>
         </head>
         <body>
-          ${selectedProductsList.map((product, index) => {
-            const pageNumber = Math.floor(index / 16);
-            const positionInPage = index % 16;
-            const isNewPage = positionInPage === 0;
-            const isEndOfPage = positionInPage === 15 || index === selectedProductsList.length - 1;
+          ${(function() {
+            let html = '';
+            const totalProducts = selectedProductsList.length;
+            const totalPages = Math.ceil(totalProducts / 16);
             
-            return `
-              ${isNewPage ? `<div class="page">` : ''}
-                <table class="label" style="width: 105mm; height: 37mm; border: none; border-collapse: collapse; padding: 1mm; box-sizing: border-box;">
-                  <tr>
-                    <td class="label-info" style="width: 70%; text-align: center; vertical-align: middle; padding-right: 2mm;">
-                      <div style="text-align: center; font-weight: bold; font-size: 10px; margin-bottom: 1mm; line-height: 1.1;">${product.brand || 'N/A'}</div>
-                      <div style="text-align: center; font-size: 8px; color: #666; margin-bottom: 1mm; word-break: break-word; line-height: 1.1;">${product.model || 'N/A'}</div>
-                      <div style="text-align: center; font-size: 8px; font-family: monospace; color: #333; line-height: 1.1;">${product.serialNumber || 'N/A'}</div>
-                    </td>
-                    <td class="qr-code" style="width: 30%; text-align: center; vertical-align: middle;">
-                      <canvas id="qr-${product.id}" width="80" height="80" style="max-width: 30mm; max-height: 30mm; width: auto; height: auto;"></canvas>
-                    </td>
-                  </tr>
-                </table>
-              ${isEndOfPage ? `</div>` : ''}
-            `;
-          }).join('')}
+            for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+              html += `<div class="page">`;
+              
+              // Générer les 16 emplacements de cette page (ou moins pour la dernière)
+              const startIndex = pageIndex * 16;
+              const endIndex = Math.min(startIndex + 16, totalProducts);
+              
+              // Créer un tableau pour organiser les produits par ligne
+              const productsInPage = [];
+              for (let i = startIndex; i < endIndex; i++) {
+                productsInPage.push(selectedProductsList[i]);
+              }
+              
+              // Organiser en 8 lignes de 2 colonnes
+              for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 2; col++) {
+                  const positionInPage = row * 2 + col;
+                  if (positionInPage < productsInPage.length) {
+                    const product = productsInPage[positionInPage];
+                    html += `
+                      <div class="label" style="grid-column: ${col + 1}; grid-row: ${row + 1}; width: 105mm; height: 37.125mm;">
+                        <table style="width: 100%; height: 100%; border: none; border-collapse: collapse; padding: 1mm; box-sizing: border-box;">
+                          <tr>
+                            <td class="label-info" style="width: 70%; text-align: center; vertical-align: middle; padding-right: 2mm;">
+                              <div style="text-align: center; font-weight: bold; font-size: 10px; margin-bottom: 1mm; line-height: 1.1;">${product.brand || 'N/A'}</div>
+                              <div style="text-align: center; font-size: 8px; color: #666; margin-bottom: 1mm; word-break: break-word; line-height: 1.1;">${product.model || 'N/A'}</div>
+                              <div style="text-align: center; font-size: 8px; font-family: monospace; color: #333; line-height: 1.1;">${product.serialNumber || 'N/A'}</div>
+                            </td>
+                            <td class="qr-code" style="width: 30%; text-align: center; vertical-align: middle;">
+                              <canvas id="qr-${product.id}" width="80" height="80" style="max-width: 30mm; max-height: 30mm; width: auto; height: auto;"></canvas>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>`;
+                  }
+                }
+              }
+              
+              html += `</div>`;
+            }
+            
+            return html;
+          })()}
         </body>
         </html>
       `;

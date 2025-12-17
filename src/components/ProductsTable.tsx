@@ -137,11 +137,10 @@ export const ProductsTable = ({
       .filter(product => product && product.id) // S'assurer que le produit existe
       .map(product => product[field])
       .filter((value): value is string => {
-        return value != null && 
-               value !== '' && 
-               value.trim() !== '' && 
-               typeof value === 'string' &&
-               value.length > 0;
+        if (typeof value !== 'string' || value == null || value === '') {
+          return false;
+        }
+        return value.trim() !== '' && value.length > 0;
       })
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort();
@@ -187,7 +186,6 @@ export const ProductsTable = ({
       (product.supplier && product.supplier.toLowerCase().includes(searchTermLower)) ||
       
       // Champs additionnels
-      (product.parcNumber && product.parcNumber.toLowerCase().includes(searchTermLower)) ||
       (product.equipmentType && product.equipmentType.toLowerCase().includes(searchTermLower)) ||
       (product.status && product.status.toLowerCase().includes(searchTermLower)) ||
       (product.invoiceNumber && product.invoiceNumber.toLowerCase().includes(searchTermLower)) ||
@@ -197,12 +195,11 @@ export const ProductsTable = ({
       (product.quantity && product.quantity.toString().includes(searchTerm)) ||
       (product.currentQuantity && product.currentQuantity.toString().includes(searchTerm)) ||
       (product.purchasePriceHt && product.purchasePriceHt.toString().includes(searchTerm)) ||
-      (product.currentValue && product.currentValue.toString().includes(searchTerm)) ||
-      (product.usageDurationYears && product.usageDurationYears.toString().includes(searchTerm)) ||
+      (product.usageDurationMonths && product.usageDurationMonths.toString().includes(searchTerm)) ||
       
       // Champs de dates
       (product.entryDate && product.entryDate.includes(searchTerm)) ||
-      (product.exitDate && product.exitDate.includes(searchTerm))
+      (product.reevaluationDate && product.reevaluationDate.includes(searchTerm))
     );
 
     // Filtres spécifiques
@@ -368,11 +365,6 @@ export const ProductsTable = ({
           <div className="font-mono text-xs truncate" title={product.serialNumber}>
             {product.serialNumber}
           </div>
-          {product.parcNumber && (
-            <div className="text-xs text-muted-foreground truncate" title={`Réf: ${product.parcNumber}`}>
-              Réf: {product.parcNumber}
-            </div>
-          )}
         </div>
       )
     },

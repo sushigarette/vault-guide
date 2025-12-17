@@ -96,11 +96,13 @@ const Index = () => {
     setShowImportDialog(true);
   };
 
-  const handleProductSubmit = (data: any) => {
+  const handleProductSubmit = async (data: any) => {
     if (editingProduct) {
-      updateProduct(editingProduct.id, data);
+      await updateProduct(editingProduct.id, data);
+      // Les produits sont automatiquement mis à jour dans le hook useStockSupabase
+      // Le dialogue des collaborateurs se rafraîchira automatiquement grâce à l'effet
     } else {
-      addProduct(data);
+      await addProduct(data);
     }
     setShowProductForm(false);
     setEditingProduct(null);

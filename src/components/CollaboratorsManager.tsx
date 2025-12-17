@@ -34,6 +34,8 @@ export const CollaboratorsManager: React.FC<CollaboratorsManagerProps> = ({
   const [showAssignProductDialog, setShowAssignProductDialog] = useState(false);
   const [assigningToCollaborator, setAssigningToCollaborator] = useState<string | null>(null);
   const [searchProduct, setSearchProduct] = useState('');
+  const [selectedProductsForAssignment, setSelectedProductsForAssignment] = useState<Set<string>>(new Set());
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleAdd = async () => {
     if (!formData.firstName.trim() || !formData.lastName.trim()) {
@@ -112,8 +114,17 @@ export const CollaboratorsManager: React.FC<CollaboratorsManagerProps> = ({
   };
 
   const getCollaboratorProducts = (collaboratorName: string): Product[] => {
+    // Utiliser refreshKey pour forcer le recalcul quand les produits changent
     return products.filter(product => product.assignment === collaboratorName);
   };
+
+  // Rafraîchir la liste quand les produits changent
+  useEffect(() => {
+    if (showProductsDialog && selectedCollaborator) {
+      // Force un re-render en incrémentant la clé
+      setRefreshKey(prev => prev + 1);
+    }
+  }, [products, showProductsDialog, selectedCollaborator]);
 
   const getCollaboratorName = (collaborator: { firstName: string; lastName: string }) => {
     return `${collaborator.firstName} ${collaborator.lastName}`;
@@ -128,6 +139,7 @@ export const CollaboratorsManager: React.FC<CollaboratorsManagerProps> = ({
   const openAssignProductDialog = (collaboratorName: string) => {
     setAssigningToCollaborator(collaboratorName);
     setSearchProduct('');
+    setSelectedProductsForAssignment(new Set());
     setShowAssignProductDialog(true);
   };
 
@@ -143,10 +155,67 @@ export const CollaboratorsManager: React.FC<CollaboratorsManagerProps> = ({
       setShowAssignProductDialog(false);
       setAssigningToCollaborator(null);
       setSearchProduct('');
+      setSelectedProductsForAssignment(new Set());
     } catch (error) {
       toast({
         title: "Erreur",
         description: "Erreur lors de l'assignation de l'équipement",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleProductSelection = (productId: string) => {
+    const newSelected = new Set(selectedProductsForAssignment);
+    if (newSelected.has(productId)) {
+      newSelected.delete(productId);
+    } else {
+      newSelected.add(productId);
+    }
+    setSelectedProductsForAssignment(newSelected);
+  };
+
+  const handleAssignSelectedProducts = async () => {
+    if (!assigningToCollaborator || selectedProductsForAssignment.size === 0) return;
+
+    try {
+      const selectedProductsList = products.filter(p => selectedProductsForAssignment.has(p.id));
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const product of selectedProductsList) {
+        try {
+          await updateProduct(product.id, { assignment: assigningToCollaborator });
+          successCount++;
+        } catch (error) {
+          errorCount++;
+          console.error(`Erreur lors de l'assignation de ${product.brand} ${product.model}:`, error);
+        }
+      }
+
+      if (successCount > 0) {
+        toast({
+          title: "Succès",
+          description: `${successCount} équipement(s) assigné(s) à ${assigningToCollaborator}${errorCount > 0 ? ` (${errorCount} erreur(s))` : ''}`,
+        });
+      }
+
+      if (errorCount > 0 && successCount === 0) {
+        toast({
+          title: "Erreur",
+          description: "Erreur lors de l'assignation des équipements",
+          variant: "destructive",
+        });
+      }
+
+      setShowAssignProductDialog(false);
+      setAssigningToCollaborator(null);
+      setSearchProduct('');
+      setSelectedProductsForAssignment(new Set());
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de l'assignation des équipements",
         variant: "destructive",
       });
     }
@@ -438,7 +507,7 @@ export const CollaboratorsManager: React.FC<CollaboratorsManagerProps> = ({
               </DialogDescription>
             </DialogHeader>
             
-            <div className="space-y-4">
+            <div className="space-y-4" key={refreshKey}>
               {selectedCollaborator && getCollaboratorProducts(selectedCollaborator).length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {getCollaboratorProducts(selectedCollaborator).map((product) => (
@@ -458,7 +527,11 @@ export const CollaboratorsManager: React.FC<CollaboratorsManagerProps> = ({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => onEditProduct(product)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onEditProduct(product);
+                                  // Le dialogue reste ouvert, la liste se mettra à jour automatiquement
+                                }}
                                 title="Modifier le produit"
                                 className="h-6 w-6 p-0"
                               >
@@ -518,10 +591,15 @@ export const CollaboratorsManager: React.FC<CollaboratorsManagerProps> = ({
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Link className="h-5 w-5" />
-                Assigner un équipement à {assigningToCollaborator}
+                Assigner des équipements à {assigningToCollaborator}
               </DialogTitle>
               <DialogDescription>
-                Sélectionnez un équipement de la base de données à assigner à ce collaborateur
+                Sélectionnez un ou plusieurs équipements de la base de données à assigner à ce collaborateur
+                {selectedProductsForAssignment.size > 0 && (
+                  <span className="block mt-2 font-semibold text-primary">
+                    {selectedProductsForAssignment.size} équipement(s) sélectionné(s)
+                  </span>
+                )}
               </DialogDescription>
             </DialogHeader>
             
@@ -540,11 +618,13 @@ export const CollaboratorsManager: React.FC<CollaboratorsManagerProps> = ({
                   getAvailableProducts().map((product) => (
                     <Card 
                       key={product.id} 
-                      className="p-4 max-w-full overflow-hidden cursor-pointer hover:bg-accent transition-colors"
-                      onClick={() => handleAssignProduct(product)}
+                      className={`p-4 max-w-full overflow-hidden cursor-pointer hover:bg-accent transition-colors ${
+                        selectedProductsForAssignment.has(product.id) ? 'ring-2 ring-primary' : ''
+                      }`}
+                      onClick={() => toggleProductSelection(product.id)}
                     >
                       <CardHeader className="p-0 pb-2">
-                        <div className="flex items-start justify-between">
+                        <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <CardTitle className="text-sm font-medium truncate" title={`${product.brand} ${product.model}`}>
                               {product.brand} {product.model}
@@ -553,6 +633,13 @@ export const CollaboratorsManager: React.FC<CollaboratorsManagerProps> = ({
                               {product.serialNumber}
                             </CardDescription>
                           </div>
+                          <input
+                            type="checkbox"
+                            checked={selectedProductsForAssignment.has(product.id)}
+                            onChange={() => toggleProductSelection(product.id)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                          />
                         </div>
                       </CardHeader>
                       <CardContent className="p-0">
@@ -591,14 +678,27 @@ export const CollaboratorsManager: React.FC<CollaboratorsManagerProps> = ({
               </div>
             </div>
 
-            <DialogFooter>
-              <Button variant="outline" onClick={() => {
-                setShowAssignProductDialog(false);
-                setAssigningToCollaborator(null);
-                setSearchProduct('');
-              }}>
-                Fermer
-              </Button>
+            <DialogFooter className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                {selectedProductsForAssignment.size > 0 && (
+                  <span>{selectedProductsForAssignment.size} équipement(s) sélectionné(s)</span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => {
+                  setShowAssignProductDialog(false);
+                  setAssigningToCollaborator(null);
+                  setSearchProduct('');
+                  setSelectedProductsForAssignment(new Set());
+                }}>
+                  Fermer
+                </Button>
+                {selectedProductsForAssignment.size > 0 && (
+                  <Button onClick={handleAssignSelectedProducts}>
+                    Assigner {selectedProductsForAssignment.size} équipement(s)
+                  </Button>
+                )}
+              </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>
