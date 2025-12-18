@@ -237,31 +237,31 @@ export const QRCodePrintPage = () => {
               width: 70%;
               text-align: center;
               vertical-align: middle;
-              padding-right: 2mm;
+              padding-right: 1mm;
             }
             
             .label-brand {
               font-weight: bold;
-              font-size: 10px;
-              margin-bottom: 1mm;
-              line-height: 1.1;
+              font-size: 9px;
+              margin-bottom: 0.5mm;
+              line-height: 1.0;
               text-align: center;
             }
             
             .label-model {
-              font-size: 8px;
+              font-size: 7px;
               color: #666;
-              margin-bottom: 1mm;
+              margin-bottom: 0.5mm;
               word-break: break-word;
-              line-height: 1.1;
+              line-height: 1.0;
               text-align: center;
             }
             
             .label-serial {
-              font-size: 8px;
+              font-size: 7px;
               font-family: monospace;
               color: #333;
-              line-height: 1.1;
+              line-height: 1.0;
               text-align: center;
             }
             
@@ -271,13 +271,14 @@ export const QRCodePrintPage = () => {
               display: flex;
               align-items: center;
               justify-content: center;
-              width: 30mm;
-              height: 30mm;
+              width: 30%;
+              height: 100%;
+              vertical-align: middle;
             }
             
             .qr-code canvas {
-              max-width: 30mm;
-              max-height: 30mm;
+              max-width: 25mm;
+              max-height: 25mm;
               width: auto;
               height: auto;
             }
@@ -326,7 +327,7 @@ export const QRCodePrintPage = () => {
                 max-width: 100% !important;
                 max-height: 100% !important;
                 border-collapse: collapse !important;
-                padding: 1mm !important;
+                padding: 0.5mm !important;
                 box-sizing: border-box !important;
                 margin: 0 !important;
               }
@@ -335,7 +336,7 @@ export const QRCodePrintPage = () => {
                 text-align: center !important;
                 vertical-align: middle !important;
                 width: 70% !important;
-                padding-right: 2mm !important;
+                padding-right: 1mm !important;
               }
 
               .label-brand, .label-model, .label-serial {
@@ -347,6 +348,17 @@ export const QRCodePrintPage = () => {
                 text-align: center !important;
                 vertical-align: middle !important;
                 width: 30% !important;
+                height: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+              }
+              
+              .qr-code canvas {
+                max-width: 25mm !important;
+                max-height: 25mm !important;
+                width: auto !important;
+                height: auto !important;
               }
             }
           </style>
@@ -378,15 +390,15 @@ export const QRCodePrintPage = () => {
                     const product = productsInPage[positionInPage];
                     html += `
                       <div class="label" style="grid-column: ${col + 1}; grid-row: ${row + 1}; width: 105mm; height: 35.875mm;">
-                        <table style="width: 100%; height: 100%; border: none; border-collapse: collapse; padding: 1mm; box-sizing: border-box;">
+                        <table style="width: 100%; height: 100%; border: none; border-collapse: collapse; padding: 0.5mm; box-sizing: border-box;">
                           <tr>
-                            <td class="label-info" style="width: 70%; text-align: center; vertical-align: middle; padding-right: 2mm;">
-                              <div style="text-align: center; font-weight: bold; font-size: 10px; margin-bottom: 1mm; line-height: 1.1;">${product.brand || 'N/A'}</div>
-                              <div style="text-align: center; font-size: 8px; color: #666; margin-bottom: 1mm; word-break: break-word; line-height: 1.1;">${product.model || 'N/A'}</div>
-                              <div style="text-align: center; font-size: 8px; font-family: monospace; color: #333; line-height: 1.1;">${product.serialNumber || 'N/A'}</div>
+                            <td class="label-info" style="width: 70%; text-align: center; vertical-align: middle; padding-right: 1mm;">
+                              <div style="text-align: center; font-weight: bold; font-size: 9px; margin-bottom: 0.5mm; line-height: 1.0;">${product.brand || 'N/A'}</div>
+                              <div style="text-align: center; font-size: 7px; color: #666; margin-bottom: 0.5mm; word-break: break-word; line-height: 1.0;">${product.model || 'N/A'}</div>
+                              <div style="text-align: center; font-size: 7px; font-family: monospace; color: #333; line-height: 1.0;">${product.serialNumber || 'N/A'}</div>
                             </td>
-                            <td class="qr-code" style="width: 30%; text-align: center; vertical-align: middle;">
-                              <canvas id="qr-${product.id}" width="80" height="80" style="max-width: 30mm; max-height: 30mm; width: auto; height: auto;"></canvas>
+                            <td class="qr-code" style="width: 30%; text-align: center; vertical-align: middle; height: 100%; display: flex; align-items: center; justify-content: center;">
+                              <canvas id="qr-${product.id}" width="80" height="80" style="max-width: 25mm; max-height: 25mm; width: auto; height: auto;"></canvas>
                             </td>
                           </tr>
                         </table>
@@ -415,7 +427,7 @@ export const QRCodePrintPage = () => {
             try {
               const qrUrl = getAppUrl(`/product/${product.id}`);
               await QRCode.toCanvas(canvas, qrUrl, {
-                width: 100,
+                width: 80,
                 margin: 1,
                 color: {
                   dark: '#000000',
