@@ -14,8 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Search, Plus, Edit, Trash2, Printer, ArrowUpDown, ArrowUp, ArrowDown, GripVertical, Filter, X, Settings, QrCode } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Printer, ArrowUpDown, ArrowUp, ArrowDown, GripVertical, Filter, X, Settings, QrCode, Download } from 'lucide-react';
 import { Product } from '@/types/stock';
+import * as XLSX from 'xlsx';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
@@ -285,6 +286,90 @@ export const ProductsTable = ({
 
   const hasActiveFilters = Object.values(filters).some(value => value !== '');
 
+  // Fonction pour exporter les produits en Excel
+  const exportProductsToExcel = () => {
+    // En-têtes Excel
+    const headers = [
+      'ID',
+      'Numéro de série',
+      'Marque',
+      'Modèle',
+      'Type de matériel',
+      'Statut',
+      'Affectation',
+      'Date d\'entrée',
+      'Fournisseur',
+      'Numéro de facture',
+      'Prix d\'achat HT',
+      'Durée d\'utilisation (mois)',
+      'Date de réévaluation',
+      'Quantité',
+      'Quantité actuelle',
+      'Commentaires',
+      'Date de création',
+      'Date de mise à jour',
+      'QR Code URL'
+    ];
+
+    // Convertir les produits en données pour Excel
+    const data = uniqueProducts.map(product => [
+      product.id,
+      product.serialNumber,
+      product.brand,
+      product.model,
+      product.equipmentType,
+      product.status,
+      product.assignment || '',
+      product.entryDate || '',
+      product.supplier || '',
+      product.invoiceNumber || '',
+      product.purchasePriceHt || '',
+      product.usageDurationMonths || '',
+      product.reevaluationDate || '',
+      product.quantity,
+      product.currentQuantity,
+      product.comments || '',
+      product.createdAt ? new Date(product.createdAt).toLocaleString('fr-FR') : '',
+      product.updatedAt ? new Date(product.updatedAt).toLocaleString('fr-FR') : '',
+      product.qrCode || ''
+    ]);
+
+    // Créer un workbook et une feuille de calcul
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+    
+    // Ajuster la largeur des colonnes
+    const columnWidths = [
+      { wch: 36 }, // ID
+      { wch: 20 }, // Numéro de série
+      { wch: 15 }, // Marque
+      { wch: 25 }, // Modèle
+      { wch: 20 }, // Type de matériel
+      { wch: 15 }, // Statut
+      { wch: 20 }, // Affectation
+      { wch: 15 }, // Date d'entrée
+      { wch: 20 }, // Fournisseur
+      { wch: 18 }, // Numéro de facture
+      { wch: 15 }, // Prix d'achat HT
+      { wch: 25 }, // Durée d'utilisation
+      { wch: 20 }, // Date de réévaluation
+      { wch: 10 }, // Quantité
+      { wch: 15 }, // Quantité actuelle
+      { wch: 30 }, // Commentaires
+      { wch: 20 }, // Date de création
+      { wch: 20 }, // Date de mise à jour
+      { wch: 50 }  // QR Code URL
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    // Créer le workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Produits');
+
+    // Générer le fichier Excel et le télécharger
+    const fileName = `export_produits_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
+
   // Déduplication des produits par ID pour éviter les clés React dupliquées
   const uniqueProducts = filteredProducts.reduce((acc, product) => {
     if (!acc.find(p => p.id === product.id)) {
@@ -447,6 +532,14 @@ export const ProductsTable = ({
             <Button onClick={onImportProducts} variant="outline">
               <Plus className="h-4 w-4 mr-2" />
               Importer
+            </Button>
+            <Button 
+              onClick={exportProductsToExcel} 
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Exporter Excel
             </Button>
             {onManageCategories && (
               <Button 
