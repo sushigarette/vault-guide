@@ -1,71 +1,78 @@
-const CACHE_NAME = 'mhstock-v1';
+const CACHE_NAME = 'mhstock-v2';
 const urlsToCache = [
   '/',
-  '/index.html',
   '/favicon.svg',
   '/favicon.ico',
   '/manifest.json'
 ];
 
-// Installation du service worker
+// Installation du service worker - force activation immédiate
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Cache ouvert');
         return cache.addAll(urlsToCache);
       })
   );
 });
 
-// Activation du service worker
+// Activation du service worker - nettoyer tous les anciens caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Suppression de l\'ancien cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
-// Interception des requêtes
+// Interception des requêtes - Network first pour les pages HTML et les assets JS/CSS
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Retourner la réponse du cache si disponible, sinon faire une requête réseau
-        if (response) {
-          return response;
-        }
+  const url = new URL(event.request.url);
+
+  // Pour les requêtes de navigation (pages HTML), toujours aller au réseau d'abord
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // Pour les assets avec hash dans le nom (ex: index-ufWqSrRv.js), cache-first
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
         return fetch(event.request).then((response) => {
-          // Vérifier si la réponse est valide
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           }
-
-          // Cloner la réponse
-          const responseToCache = response.clone();
-
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-
           return response;
         });
       })
-      .catch(() => {
-        // En cas d'erreur, retourner une page hors ligne si c'est une navigation
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
+    );
+    return;
+  }
+
+  // Pour les autres requêtes, network first avec fallback cache
+  event.respondWith(
+    fetch(event.request)
+      .then((response) => {
+        if (response && response.status === 200 && response.type === 'basic') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
+        return response;
       })
+      .catch(() => caches.match(event.request))
   );
 });
 
