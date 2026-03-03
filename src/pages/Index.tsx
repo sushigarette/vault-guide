@@ -124,7 +124,6 @@ const Index = () => {
 
   const handlePrintProductFromCollaborator = (product: Product) => {
     setPrintingProduct(product);
-    setShowBarcodeModal(true);
     setShowCategoriesManager(false);
   };
 
