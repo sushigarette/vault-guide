@@ -1,6 +1,3 @@
-# Redirection pour les routes React
-# Toutes les routes qui ne correspondent pas à un fichier statique
-# doivent rediriger vers index.html pour que le routing React fonctionne
-
-# Pas besoin d'entrées spécifiques, la configuration Nginx gère ça
-# avec try_files $uri $uri/ /index.html;
+# SPA redirect: all routes that don't match a static file
+# are redirected to index.html for React client-side routing
+/*    /index.html   200
